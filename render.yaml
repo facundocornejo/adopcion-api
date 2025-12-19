@@ -1,0 +1,41 @@
+# render.yaml - Configuración para deploy en Render
+# Documentación: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: adopcion-api
+    runtime: node
+    region: oregon  # Región gratuita más cercana a Argentina
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false  # Configurar manualmente en Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Render genera un valor aleatorio seguro
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false  # URL del frontend en producción
