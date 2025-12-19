@@ -1,0 +1,103 @@
+// Configuración del cliente Prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuración de la base de datos PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// TABLA: administrador
+// Usuarios que pueden gestionar el sistema
+// ============================================
+model Administrador {
+  id             Int       @id @default(autoincrement())
+  username       String    @unique @db.VarChar(50)
+  password_hash  String    @db.VarChar(255)
+  email          String    @unique @db.VarChar(100)
+  fecha_creacion DateTime  @default(now())
+  ultimo_acceso  DateTime?
+
+  // Relación: un admin puede publicar muchos animales
+  animales Animal[]
+
+  @@map("administrador")
+}
+
+// ============================================
+// TABLA: animal
+// Animales disponibles para adopción
+// ============================================
+model Animal {
+  id                     Int      @id @default(autoincrement())
+  administrador_id       Int
+  nombre                 String   @db.VarChar(100)
+  especie                String   @db.VarChar(20) // 'Perro' | 'Gato'
+  sexo                   String   @db.VarChar(10) // 'Macho' | 'Hembra'
+  edad_aproximada        String   @db.VarChar(50)
+  tamanio                String   @db.VarChar(20) // 'Pequeño' | 'Mediano' | 'Grande'
+  raza_mezcla            String?  @db.VarChar(100)
+  descripcion_historia   String   @db.Text
+  estado_castracion      Boolean  @default(false)
+  estado_vacunacion      String?  @db.VarChar(200)
+  estado_desparasitacion Boolean  @default(false)
+  socializa_perros       Boolean  @default(false)
+  socializa_gatos        Boolean  @default(false)
+  socializa_ninos        Boolean  @default(false)
+  necesidades_especiales String?  @db.Text
+  tipo_hogar_ideal       String?  @db.VarChar(200)
+  estado                 String   @default("Disponible") @db.VarChar(20)
+  publicado_por          String   @db.VarChar(100)
+  contacto_rescatista    String   @db.VarChar(200)
+  foto_principal         String   @db.VarChar(255)
+  foto_2                 String?  @db.VarChar(255)
+  foto_3                 String?  @db.VarChar(255)
+  foto_4                 String?  @db.VarChar(255)
+  foto_5                 String?  @db.VarChar(255)
+  fecha_publicacion      DateTime @default(now())
+  fecha_actualizacion    DateTime @updatedAt
+
+  // Relación: pertenece a un administrador
+  administrador Administrador @relation(fields: [administrador_id], references: [id])
+
+  // Relación: puede tener muchas solicitudes de adopción
+  solicitudes SolicitudAdopcion[]
+
+  @@map("animal")
+}
+
+// ============================================
+// TABLA: solicitud_adopcion
+// Formularios enviados por potenciales adoptantes
+// ============================================
+model SolicitudAdopcion {
+  id                      Int      @id @default(autoincrement())
+  animal_id               Int
+  nombre_completo         String   @db.VarChar(100)
+  edad                    Int
+  email                   String   @db.VarChar(100)
+  telefono_whatsapp       String   @db.VarChar(20)
+  instagram               String?  @db.VarChar(100)
+  ciudad_zona             String   @db.VarChar(100)
+  tipo_vivienda           String   @db.VarChar(50)
+  vive_solo_acompanado    String   @db.VarChar(100)
+  todos_de_acuerdo        Boolean
+  tiene_otros_animales    Boolean  @default(false)
+  otros_animales_castrados String? @db.VarChar(50)
+  experiencia_previa      String   @db.Text
+  puede_cubrir_gastos     Boolean
+  veterinaria_que_usa     String?  @db.VarChar(200)
+  motivacion              String   @db.Text
+  compromiso_castracion   Boolean
+  acepta_contacto         Boolean  @default(true)
+  fecha_solicitud         DateTime @default(now())
+  estado_solicitud        String   @default("Nueva") @db.VarChar(20)
+
+  // Relación: pertenece a un animal
+  animal Animal @relation(fields: [animal_id], references: [id])
+
+  @@map("solicitud_adopcion")
+}
