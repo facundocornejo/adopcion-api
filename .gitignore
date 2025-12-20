@@ -32,3 +32,6 @@ prisma/migrations/.prisma_lock
 tmp/
 temp/
 *.tmp
+
+# Documentación interna (no subir a Git)
+docs/
