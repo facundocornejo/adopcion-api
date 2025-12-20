@@ -4,6 +4,8 @@ require('dotenv').config();
 // Importar dependencias
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 // Importar configuración de base de datos
 const prisma = require('./config/database');
@@ -43,9 +45,16 @@ app.get('/', (req, res) => {
   res.json({
     success: true,
     message: 'API de Adopción de Animales funcionando correctamente',
-    version: '1.0.0'
+    version: '1.0.0',
+    docs: '/api-docs'
   });
 });
+
+// Swagger UI - Documentación de la API
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'API Adopción - Documentación'
+}));
 
 // Ruta de health check (útil para monitoreo)
 app.get('/api/health', async (req, res) => {

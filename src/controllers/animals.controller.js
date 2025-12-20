@@ -8,8 +8,11 @@ const getAnimals = async (req, res) => {
     // Construir filtros
     const where = {};
 
-    // Si NO está autenticado (público), solo mostrar ciertos estados
-    if (!req.admin) {
+    // Si está autenticado, filtrar por su organización
+    if (req.admin) {
+      where.organizacion_id = req.admin.organizacion_id;
+    } else {
+      // Si NO está autenticado (público), solo mostrar ciertos estados
       where.estado = { in: ['Disponible', 'En proceso', 'En transito'] };
     }
 
@@ -32,7 +35,8 @@ const getAnimals = async (req, res) => {
         tamanio: true,
         estado: true,
         foto_principal: true,
-        fecha_publicacion: true
+        fecha_publicacion: true,
+        organizacion: { select: { id: true, nombre: true, slug: true } }
       },
       orderBy: { fecha_publicacion: 'desc' }
     });
@@ -134,6 +138,7 @@ const createAnimal = async (req, res) => {
 
     const animal = await prisma.animal.create({
       data: {
+        organizacion_id: req.admin.organizacion_id,
         administrador_id: req.admin.id,
         nombre,
         especie,
@@ -191,7 +196,7 @@ const updateAnimal = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Verificar que el animal existe
+    // Verificar que el animal existe y pertenece a la organización
     const existingAnimal = await prisma.animal.findUnique({
       where: { id: parseInt(id) }
     });
@@ -202,6 +207,16 @@ const updateAnimal = async (req, res) => {
         error: {
           code: 'NOT_FOUND',
           message: 'Animal no encontrado'
+        }
+      });
+    }
+
+    if (existingAnimal.organizacion_id !== req.admin.organizacion_id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'No tienes permiso para modificar este animal'
         }
       });
     }
@@ -300,6 +315,16 @@ const updateAnimalStatus = async (req, res) => {
       });
     }
 
+    if (existingAnimal.organizacion_id !== req.admin.organizacion_id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'No tienes permiso para modificar este animal'
+        }
+      });
+    }
+
     const animal = await prisma.animal.update({
       where: { id: parseInt(id) },
       data: { estado },
@@ -346,6 +371,16 @@ const deleteAnimal = async (req, res) => {
         error: {
           code: 'NOT_FOUND',
           message: 'Animal no encontrado'
+        }
+      });
+    }
+
+    if (existingAnimal.organizacion_id !== req.admin.organizacion_id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'No tienes permiso para eliminar este animal'
         }
       });
     }
