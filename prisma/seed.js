@@ -57,7 +57,11 @@ async function main() {
     organizacion: org1.nombre
   });
 
-  // 4. Crear animales de ejemplo con 5 fotos cada uno
+  // 4. Limpiar animales existentes y crear nuevos
+  await prisma.animal.deleteMany({});
+  console.log('Animales anteriores eliminados');
+
+  // 5. Crear animales de ejemplo con 5 fotos cada uno
   const animalesData = [
     {
       nombre: 'Luna',
