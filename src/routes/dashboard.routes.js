@@ -12,9 +12,32 @@ const { verificarToken } = require('../middlewares/auth.middleware');
 // ============================================
 
 /**
- * GET /api/dashboard/stats
- * Obtener estadísticas generales para el dashboard
- * Solo accesible por administradores autenticados
+ * @swagger
+ * /api/dashboard/stats:
+ *   get:
+ *     summary: Estadísticas del dashboard
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estadísticas generales
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     resumen:
+ *                       type: object
+ *                     animales_por_estado:
+ *                       type: object
+ *                     solicitudes_por_estado:
+ *                       type: object
  */
 router.get('/stats', verificarToken, getDashboardStats);
 
