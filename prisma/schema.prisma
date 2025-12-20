@@ -10,16 +10,43 @@ datasource db {
 }
 
 // ============================================
+// TABLA: organizacion
+// Refugios/organizaciones que usan la plataforma
+// ============================================
+model Organizacion {
+  id             Int       @id @default(autoincrement())
+  nombre         String    @db.VarChar(100)
+  slug           String    @unique @db.VarChar(50) // identificador único URL-friendly
+  email          String?   @db.VarChar(100)
+  telefono       String?   @db.VarChar(20)
+  direccion      String?   @db.VarChar(200)
+  logo_url       String?   @db.VarChar(255)
+  descripcion    String?   @db.Text
+  activa         Boolean   @default(true)
+  fecha_creacion DateTime  @default(now())
+
+  // Relaciones
+  administradores Administrador[]
+  animales        Animal[]
+
+  @@map("organizacion")
+}
+
+// ============================================
 // TABLA: administrador
 // Usuarios que pueden gestionar el sistema
 // ============================================
 model Administrador {
-  id             Int       @id @default(autoincrement())
-  username       String    @unique @db.VarChar(50)
-  password_hash  String    @db.VarChar(255)
-  email          String    @unique @db.VarChar(100)
-  fecha_creacion DateTime  @default(now())
-  ultimo_acceso  DateTime?
+  id              Int       @id @default(autoincrement())
+  organizacion_id Int
+  username        String    @unique @db.VarChar(50)
+  password_hash   String    @db.VarChar(255)
+  email           String    @unique @db.VarChar(100)
+  fecha_creacion  DateTime  @default(now())
+  ultimo_acceso   DateTime?
+
+  // Relación: pertenece a una organización
+  organizacion Organizacion @relation(fields: [organizacion_id], references: [id])
 
   // Relación: un admin puede publicar muchos animales
   animales Animal[]
@@ -33,6 +60,7 @@ model Administrador {
 // ============================================
 model Animal {
   id                     Int      @id @default(autoincrement())
+  organizacion_id        Int
   administrador_id       Int
   nombre                 String   @db.VarChar(100)
   especie                String   @db.VarChar(20) // 'Perro' | 'Gato'
@@ -59,6 +87,9 @@ model Animal {
   foto_5                 String?  @db.VarChar(255)
   fecha_publicacion      DateTime @default(now())
   fecha_actualizacion    DateTime @updatedAt
+
+  // Relación: pertenece a una organización
+  organizacion Organizacion @relation(fields: [organizacion_id], references: [id])
 
   // Relación: pertenece a un administrador
   administrador Administrador @relation(fields: [administrador_id], references: [id])
