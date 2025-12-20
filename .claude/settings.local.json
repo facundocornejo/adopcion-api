@@ -20,7 +20,10 @@
       "Bash(__NEW_LINE__ echo -e \"\\\\n\\\\n=== SOLICITUD CON DATOS INVALIDOS ===\")",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBhZG9wY2lvbi5jb20iLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzY2MTg0ODU3LCJleHAiOjE3NjYyNzEyNTd9.YYlLci0pkLy56rJHLhx2EUvjTRldDELpUCVz7qW3mdk\")",
       "Bash(__NEW_LINE__ curl -s http://localhost:3000/api/dashboard/stats )",
-      "Bash(python -m json.tool:*)"
+      "Bash(python -m json.tool:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)"
     ]
   }
 }
