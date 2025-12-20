@@ -33,14 +33,154 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
-// Rutas públicas (con auth opcional para mostrar más datos si está logueado)
+/**
+ * @swagger
+ * /api/animals:
+ *   get:
+ *     summary: Listar animales
+ *     tags: [Animales]
+ *     parameters:
+ *       - in: query
+ *         name: estado
+ *         schema:
+ *           type: string
+ *           enum: [Disponible, En proceso, Adoptado, En transito]
+ *         description: Filtrar por estado
+ *       - in: query
+ *         name: especie
+ *         schema:
+ *           type: string
+ *           enum: [Perro, Gato]
+ *         description: Filtrar por especie
+ *     responses:
+ *       200:
+ *         description: Lista de animales
+ */
 router.get('/', optionalAuth, getAnimals);
+
+/**
+ * @swagger
+ * /api/animals/{id}:
+ *   get:
+ *     summary: Obtener un animal por ID
+ *     tags: [Animales]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del animal
+ *     responses:
+ *       200:
+ *         description: Detalle del animal
+ *       404:
+ *         description: Animal no encontrado
+ */
 router.get('/:id', idParamValidation, optionalAuth, getAnimalById);
 
-// Rutas protegidas
+/**
+ * @swagger
+ * /api/animals:
+ *   post:
+ *     summary: Crear un nuevo animal
+ *     tags: [Animales]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AnimalInput'
+ *     responses:
+ *       201:
+ *         description: Animal creado
+ *       400:
+ *         description: Error de validación
+ *       401:
+ *         description: No autenticado
+ */
 router.post('/', verificarToken, animalValidation, createAnimal);
+
+/**
+ * @swagger
+ * /api/animals/{id}:
+ *   put:
+ *     summary: Actualizar un animal
+ *     tags: [Animales]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AnimalInput'
+ *     responses:
+ *       200:
+ *         description: Animal actualizado
+ *       404:
+ *         description: Animal no encontrado
+ */
 router.put('/:id', verificarToken, idParamValidation, animalValidation, updateAnimal);
+
+/**
+ * @swagger
+ * /api/animals/{id}/status:
+ *   patch:
+ *     summary: Cambiar estado de un animal
+ *     tags: [Animales]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               estado:
+ *                 type: string
+ *                 enum: [Disponible, En proceso, Adoptado, En transito]
+ *     responses:
+ *       200:
+ *         description: Estado actualizado
+ */
 router.patch('/:id/status', verificarToken, idParamValidation, statusValidation, updateAnimalStatus);
+
+/**
+ * @swagger
+ * /api/animals/{id}:
+ *   delete:
+ *     summary: Eliminar un animal
+ *     tags: [Animales]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Animal eliminado
+ *       404:
+ *         description: Animal no encontrado
+ */
 router.delete('/:id', verificarToken, idParamValidation, deleteAnimal);
 
 module.exports = router;

@@ -63,8 +63,61 @@ const handleMulterError = (err, req, res, next) => {
   next();
 };
 
-// Rutas protegidas
+/**
+ * @swagger
+ * /api/upload:
+ *   post:
+ *     summary: Subir imagen a Cloudinary
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Imagen subida
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                     public_id:
+ *                       type: string
+ */
 router.post('/', verificarToken, upload.single('file'), handleMulterError, uploadImage);
+
+/**
+ * @swagger
+ * /api/upload/{publicId}:
+ *   delete:
+ *     summary: Eliminar imagen de Cloudinary
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: publicId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Imagen eliminada
+ */
 router.delete('/:publicId', verificarToken, deleteImage);
 
 module.exports = router;
