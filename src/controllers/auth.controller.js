@@ -18,9 +18,10 @@ const login = async (req, res) => {
       });
     }
 
-    // Buscar el admin por email
+    // Buscar el admin por email con su organización
     const admin = await prisma.administrador.findUnique({
-      where: { email }
+      where: { email },
+      include: { organizacion: true }
     });
 
     if (!admin) {
@@ -29,6 +30,17 @@ const login = async (req, res) => {
         error: {
           code: 'INVALID_CREDENTIALS',
           message: 'Email o contraseña incorrectos'
+        }
+      });
+    }
+
+    // Verificar que la organización esté activa
+    if (!admin.organizacion.activa) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'ORGANIZATION_INACTIVE',
+          message: 'La organización está desactivada'
         }
       });
     }
@@ -46,12 +58,13 @@ const login = async (req, res) => {
       });
     }
 
-    // Generar el token JWT
+    // Generar el token JWT con organizacion_id
     const token = jwt.sign(
       {
         id: admin.id,
         email: admin.email,
-        username: admin.username
+        username: admin.username,
+        organizacion_id: admin.organizacion_id
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
@@ -63,7 +76,7 @@ const login = async (req, res) => {
       data: { ultimo_acceso: new Date() }
     });
 
-    // Responder con el token y datos del admin
+    // Responder con el token y datos del admin + organización
     res.json({
       success: true,
       data: {
@@ -72,6 +85,11 @@ const login = async (req, res) => {
           id: admin.id,
           username: admin.username,
           email: admin.email
+        },
+        organizacion: {
+          id: admin.organizacion.id,
+          nombre: admin.organizacion.nombre,
+          slug: admin.organizacion.slug
         }
       }
     });
@@ -90,10 +108,6 @@ const login = async (req, res) => {
 
 // POST /api/auth/logout
 const logout = async (req, res) => {
-  // En JWT stateless, el logout se maneja en el frontend
-  // eliminando el token del storage. Este endpoint es simbólico
-  // pero útil para logging o invalidar tokens en el futuro.
-
   res.json({
     success: true,
     data: {
@@ -112,7 +126,18 @@ const me = async (req, res) => {
         username: true,
         email: true,
         fecha_creacion: true,
-        ultimo_acceso: true
+        ultimo_acceso: true,
+        organizacion: {
+          select: {
+            id: true,
+            nombre: true,
+            slug: true,
+            email: true,
+            telefono: true,
+            direccion: true,
+            logo_url: true
+          }
+        }
       }
     });
 
