@@ -3,7 +3,7 @@ const prisma = require('../config/database');
 // GET /api/animals - Listar animales
 const getAnimals = async (req, res) => {
   try {
-    const { estado, especie } = req.query;
+    const { estado, especie, tamanio, busqueda } = req.query;
 
     // Construir filtros
     const where = {};
@@ -22,6 +22,12 @@ const getAnimals = async (req, res) => {
     }
     if (especie) {
       where.especie = especie;
+    }
+    if (tamanio) {
+      where.tamanio = tamanio;
+    }
+    if (busqueda) {
+      where.nombre = { contains: busqueda, mode: 'insensitive' };
     }
 
     const animals = await prisma.animal.findMany({
