@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middlewares/auth.middleware');
+const { verificarToken } = require('../middlewares/auth.middleware');
 const {
   getMyOrganization,
   updateMyOrganization,
@@ -19,7 +19,7 @@ const {
  *       200:
  *         description: Datos de la organización
  */
-router.get('/', authMiddleware, getMyOrganization);
+router.get('/', verificarToken, getMyOrganization);
 
 /**
  * @swagger
@@ -62,7 +62,7 @@ router.get('/', authMiddleware, getMyOrganization);
  *       200:
  *         description: Organización actualizada
  */
-router.put('/', authMiddleware, updateMyOrganization);
+router.put('/', verificarToken, updateMyOrganization);
 
 /**
  * @swagger
