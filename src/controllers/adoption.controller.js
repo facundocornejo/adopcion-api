@@ -31,7 +31,15 @@ const createAdoptionRequest = async (req, res) => {
     // Verificar que el animal existe y está disponible
     const animal = await prisma.animal.findUnique({
       where: { id: parseInt(animal_id) },
-      select: { id: true, nombre: true, estado: true }
+      select: {
+        id: true,
+        nombre: true,
+        estado: true,
+        especie: true,
+        organizacion: {
+          select: { id: true, nombre: true, email: true }
+        }
+      }
     });
 
     if (!animal) {
@@ -84,8 +92,8 @@ const createAdoptionRequest = async (req, res) => {
       }
     });
 
-    // Enviar email de notificación al admin (async, no bloquea la respuesta)
-    notificarNuevaSolicitud(solicitud, solicitud.animal)
+    // Enviar email de notificación a la organización (async, no bloquea la respuesta)
+    notificarNuevaSolicitud(solicitud, solicitud.animal, animal.organizacion)
       .then(result => {
         if (!result.success) {
           console.warn('No se pudo enviar email de notificación:', result.reason || result.error);

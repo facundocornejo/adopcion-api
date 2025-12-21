@@ -19,9 +19,20 @@ model Organizacion {
   slug           String    @unique @db.VarChar(50) // identificador único URL-friendly
   email          String?   @db.VarChar(100)
   telefono       String?   @db.VarChar(20)
+  whatsapp       String?   @db.VarChar(20)
   direccion      String?   @db.VarChar(200)
   logo_url       String?   @db.VarChar(255)
   descripcion    String?   @db.Text
+
+  // Redes sociales
+  instagram      String?   @db.VarChar(100)
+  facebook       String?   @db.VarChar(100)
+
+  // Datos para donaciones
+  donacion_alias     String?   @db.VarChar(100) // Alias de MercadoPago/transferencia
+  donacion_cbu       String?   @db.VarChar(30)  // CBU/CVU
+  donacion_info      String?   @db.Text         // Información adicional de donación
+
   activa         Boolean   @default(true)
   fecha_creacion DateTime  @default(now())
 

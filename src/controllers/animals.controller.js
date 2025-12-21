@@ -73,7 +73,21 @@ const getAnimalById = async (req, res) => {
     const { id } = req.params;
 
     const animal = await prisma.animal.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
+      include: {
+        organizacion: {
+          select: {
+            id: true,
+            nombre: true,
+            slug: true,
+            whatsapp: true,
+            instagram: true,
+            facebook: true,
+            donacion_alias: true,
+            donacion_info: true
+          }
+        }
+      }
     });
 
     if (!animal) {

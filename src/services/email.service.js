@@ -4,19 +4,23 @@ const transporter = require('../config/email');
  * Enviar email de notificación cuando llega una nueva solicitud de adopción
  * @param {Object} solicitud - Datos de la solicitud
  * @param {Object} animal - Datos del animal
+ * @param {Object} organizacion - Datos de la organización (opcional)
  */
-const notificarNuevaSolicitud = async (solicitud, animal) => {
+const notificarNuevaSolicitud = async (solicitud, animal, organizacion = null) => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL;
+    // Usar email de la organización si existe, sino el ADMIN_EMAIL global
+    const destinatario = organizacion?.email || process.env.ADMIN_EMAIL;
 
-    if (!adminEmail) {
-      console.warn('ADMIN_EMAIL no configurado - No se enviará notificación');
-      return { success: false, reason: 'ADMIN_EMAIL not configured' };
+    if (!destinatario) {
+      console.warn('No hay email de destino configurado - No se enviará notificación');
+      return { success: false, reason: 'No destination email configured' };
     }
 
+    const nombreOrg = organizacion?.nombre || 'Administrador';
+
     const mailOptions = {
-      from: `"Adopciones" <${process.env.SMTP_USER}>`,
-      to: adminEmail,
+      from: `"Adopción Responsable" <${process.env.SMTP_USER}>`,
+      to: destinatario,
       subject: `Nueva solicitud de adopción para ${animal.nombre}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -86,7 +90,7 @@ const notificarNuevaSolicitud = async (solicitud, animal) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`Email de notificación enviado a ${adminEmail} para solicitud #${solicitud.id}`);
+    console.log(`Email de notificación enviado a ${destinatario} para solicitud #${solicitud.id}`);
 
     return { success: true };
 

@@ -16,6 +16,7 @@ const animalsRoutes = require('./routes/animals.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const adoptionRoutes = require('./routes/adoption.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const organizationRoutes = require('./routes/organization.routes');
 
 // Crear la aplicación Express
 const app = express();
@@ -99,6 +100,7 @@ app.use('/api/animals', animalsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/adoption-requests', adoptionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/organization', organizationRoutes);
 
 // ============================================
 // MANEJO DE ERRORES
