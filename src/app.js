@@ -4,6 +4,8 @@ require('dotenv').config();
 // Importar dependencias
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
@@ -25,6 +27,44 @@ const app = express();
 // ============================================
 // MIDDLEWARES GLOBALES
 // ============================================
+
+// Helmet - Headers de seguridad
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Permitir imágenes de Cloudinary
+  contentSecurityPolicy: false // Desactivado para permitir Swagger UI
+}));
+
+// Rate Limiting - Prevenir ataques de fuerza bruta
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // 100 requests por ventana
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT',
+      message: 'Demasiadas solicitudes, intentá más tarde'
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // 5 intentos de login
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT',
+      message: 'Demasiados intentos de login, esperá 15 minutos'
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Aplicar rate limiting general
+app.use('/api', generalLimiter);
 
 // Habilitar CORS para permitir requests del frontend
 const allowedOrigins = [
@@ -96,6 +136,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Rutas de la API
+app.use('/api/auth/login', loginLimiter); // Rate limit estricto para login
 app.use('/api/auth', authRoutes);
 app.use('/api/animals', animalsRoutes);
 app.use('/api/upload', uploadRoutes);
