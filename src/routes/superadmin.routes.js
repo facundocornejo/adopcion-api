@@ -6,6 +6,7 @@ const {
   getOrganizations,
   createOrganization,
   toggleOrganization,
+  deleteOrganization,
   getContactRequests,
   updateContactRequest,
   createContactRequest
@@ -138,6 +139,26 @@ router.post('/super-admin/organizations', verificarToken, verificarSuperAdmin, c
  *         description: Organización actualizada
  */
 router.put('/super-admin/organizations/:id/toggle', verificarToken, verificarSuperAdmin, toggleOrganization);
+
+/**
+ * @swagger
+ * /api/super-admin/organizations/{id}:
+ *   delete:
+ *     summary: Eliminar organización completamente
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Organización eliminada
+ */
+router.delete('/super-admin/organizations/:id', verificarToken, verificarSuperAdmin, deleteOrganization);
 
 /**
  * @swagger

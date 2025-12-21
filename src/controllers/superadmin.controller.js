@@ -242,6 +242,89 @@ const toggleOrganization = async (req, res) => {
 };
 
 /**
+ * Eliminar organización completamente (hard delete)
+ * DELETE /api/super-admin/organizations/:id
+ */
+const deleteOrganization = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const orgId = parseInt(id);
+
+    // Verificar que existe
+    const organizacion = await prisma.organizacion.findUnique({
+      where: { id: orgId },
+      include: {
+        _count: {
+          select: {
+            animales: true,
+            administradores: true
+          }
+        }
+      }
+    });
+
+    if (!organizacion) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Organización no encontrada'
+        }
+      });
+    }
+
+    // Eliminar en cascada usando transacción
+    await prisma.$transaction(async (tx) => {
+      // 1. Obtener IDs de animales de esta organización
+      const animales = await tx.animal.findMany({
+        where: { organizacion_id: orgId },
+        select: { id: true }
+      });
+      const animalIds = animales.map(a => a.id);
+
+      // 2. Eliminar solicitudes de adopción de esos animales
+      if (animalIds.length > 0) {
+        await tx.solicitudAdopcion.deleteMany({
+          where: { animal_id: { in: animalIds } }
+        });
+      }
+
+      // 3. Eliminar animales
+      await tx.animal.deleteMany({
+        where: { organizacion_id: orgId }
+      });
+
+      // 4. Eliminar administradores
+      await tx.administrador.deleteMany({
+        where: { organizacion_id: orgId }
+      });
+
+      // 5. Eliminar organización
+      await tx.organizacion.delete({
+        where: { id: orgId }
+      });
+    });
+
+    res.json({
+      success: true,
+      data: {
+        message: `Organización "${organizacion.nombre}" eliminada correctamente junto con ${organizacion._count.animales} animal(es) y ${organizacion._count.administradores} admin(s)`
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en deleteOrganization:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Error al eliminar la organización'
+      }
+    });
+  }
+};
+
+/**
  * Listar solicitudes de contacto de rescatistas
  * GET /api/super-admin/contact-requests
  */
@@ -379,6 +462,7 @@ module.exports = {
   getOrganizations,
   createOrganization,
   toggleOrganization,
+  deleteOrganization,
   getContactRequests,
   updateContactRequest,
   createContactRequest
