@@ -152,7 +152,8 @@ const getOrganizationBySlug = async (req, res) => {
         instagram: true,
         facebook: true,
         donacion_alias: true,
-        donacion_info: true
+        donacion_info: true,
+        activa: true
         // No exponemos email ni CBU completo por seguridad
       }
     });

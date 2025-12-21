@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "build": "npx prisma generate",
+    "build": "npx prisma generate && npx prisma db push",
     "postinstall": "npx prisma generate",
     "db:migrate": "npx prisma migrate dev",
     "db:push": "npx prisma db push",
