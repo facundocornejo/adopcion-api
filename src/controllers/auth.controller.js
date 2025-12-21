@@ -58,13 +58,14 @@ const login = async (req, res) => {
       });
     }
 
-    // Generar el token JWT con organizacion_id
+    // Generar el token JWT con organizacion_id y es_super_admin
     const token = jwt.sign(
       {
         id: admin.id,
         email: admin.email,
         username: admin.username,
-        organizacion_id: admin.organizacion_id
+        organizacion_id: admin.organizacion_id,
+        es_super_admin: admin.es_super_admin || false
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
@@ -84,7 +85,8 @@ const login = async (req, res) => {
         admin: {
           id: admin.id,
           username: admin.username,
-          email: admin.email
+          email: admin.email,
+          es_super_admin: admin.es_super_admin || false
         },
         organizacion: {
           id: admin.organizacion.id,
@@ -125,6 +127,7 @@ const me = async (req, res) => {
         id: true,
         username: true,
         email: true,
+        es_super_admin: true,
         fecha_creacion: true,
         ultimo_acceso: true,
         organizacion: {

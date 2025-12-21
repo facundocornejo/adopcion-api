@@ -17,6 +17,7 @@ const uploadRoutes = require('./routes/upload.routes');
 const adoptionRoutes = require('./routes/adoption.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const organizationRoutes = require('./routes/organization.routes');
+const superadminRoutes = require('./routes/superadmin.routes');
 
 // Crear la aplicación Express
 const app = express();
@@ -101,6 +102,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/adoption-requests', adoptionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/organization', organizationRoutes);
+app.use('/api', superadminRoutes);
 
 // ============================================
 // MANEJO DE ERRORES

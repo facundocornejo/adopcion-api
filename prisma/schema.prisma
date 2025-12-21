@@ -53,6 +53,7 @@ model Administrador {
   username        String    @unique @db.VarChar(50)
   password_hash   String    @db.VarChar(255)
   email           String    @unique @db.VarChar(100)
+  es_super_admin  Boolean   @default(false)
   fecha_creacion  DateTime  @default(now())
   ultimo_acceso   DateTime?
 
@@ -142,4 +143,27 @@ model SolicitudAdopcion {
   animal Animal @relation(fields: [animal_id], references: [id])
 
   @@map("solicitud_adopcion")
+}
+
+// ============================================
+// TABLA: solicitud_contacto
+// Rescatistas que quieren unirse a la plataforma
+// ============================================
+model SolicitudContacto {
+  id                Int      @id @default(autoincrement())
+  nombre_refugio    String   @db.VarChar(100)
+  nombre_contacto   String   @db.VarChar(100)
+  email             String   @db.VarChar(100)
+  telefono          String   @db.VarChar(20)
+  ciudad            String   @db.VarChar(100)
+  descripcion       String   @db.Text
+  instagram         String?  @db.VarChar(100)
+  facebook          String?  @db.VarChar(100)
+  cantidad_animales String?  @db.VarChar(50)  // Aproximado de animales que rescata
+  estado            String   @default("Pendiente") @db.VarChar(20) // Pendiente, Aprobada, Rechazada
+  notas_admin       String?  @db.Text
+  fecha_solicitud   DateTime @default(now())
+  fecha_respuesta   DateTime?
+
+  @@map("solicitud_contacto")
 }
