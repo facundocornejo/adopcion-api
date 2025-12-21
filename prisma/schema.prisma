@@ -39,6 +39,7 @@ model Organizacion {
   // Relaciones
   administradores Administrador[]
   animales        Animal[]
+  casosExito      CasoExito[]
 
   @@map("organizacion")
 }
@@ -109,6 +110,9 @@ model Animal {
   // Relación: puede tener muchas solicitudes de adopción
   solicitudes SolicitudAdopcion[]
 
+  // Relación: puede tener un caso de éxito (si fue adoptado)
+  casoExito CasoExito?
+
   @@map("animal")
 }
 
@@ -166,4 +170,29 @@ model SolicitudContacto {
   fecha_respuesta   DateTime?
 
   @@map("solicitud_contacto")
+}
+
+// ============================================
+// TABLA: caso_exito
+// Historias de animales adoptados exitosamente
+// ============================================
+model CasoExito {
+  id                Int       @id @default(autoincrement())
+  animal_id         Int       @unique
+  organizacion_id   Int
+  titulo            String    @db.VarChar(200)
+  historia          String    @db.Text
+  foto_actual_1     String?   @db.VarChar(255)
+  foto_actual_2     String?   @db.VarChar(255)
+  foto_actual_3     String?   @db.VarChar(255)
+  fecha_adopcion    DateTime
+  fecha_publicacion DateTime  @default(now())
+
+  // Relación: pertenece a un animal
+  animal Animal @relation(fields: [animal_id], references: [id])
+
+  // Relación: pertenece a una organización
+  organizacion Organizacion @relation(fields: [organizacion_id], references: [id])
+
+  @@map("caso_exito")
 }

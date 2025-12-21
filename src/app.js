@@ -20,6 +20,7 @@ const adoptionRoutes = require('./routes/adoption.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const organizationRoutes = require('./routes/organization.routes');
 const superadminRoutes = require('./routes/superadmin.routes');
+const casosExitoRoutes = require('./routes/casosexito.routes');
 
 // Crear la aplicación Express
 const app = express();
@@ -144,6 +145,7 @@ app.use('/api/adoption-requests', adoptionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/organization', organizationRoutes);
 app.use('/api', superadminRoutes);
+app.use('/api/casos-exito', casosExitoRoutes);
 
 // ============================================
 // MANEJO DE ERRORES
