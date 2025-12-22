@@ -80,6 +80,11 @@ app.use(cors({
     // Permitir requests sin origin (como mobile apps o curl)
     if (!origin) return callback(null, true);
 
+    // Permitir cualquier subdominio de vercel.app que contenga "adopcion-resposanble"
+    if (origin.includes('adopcion-resposanble') && origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
