@@ -3,15 +3,20 @@ const prisma = require('../config/database');
 /**
  * GET /api/casos-exito
  * Listar todos los casos de éxito agrupados por organización
+ * Solo muestra casos donde el animal sigue con estado "Adoptado"
  */
 const getCasosExito = async (req, res) => {
   try {
-    // Obtener organizaciones con sus casos de éxito
+    // Obtener organizaciones con sus casos de éxito (solo de animales adoptados)
     const organizaciones = await prisma.organizacion.findMany({
       where: {
         activa: true,
         casosExito: {
-          some: {} // Solo orgs que tienen al menos un caso
+          some: {
+            animal: {
+              estado: 'Adoptado' // Solo casos de animales que siguen adoptados
+            }
+          }
         }
       },
       select: {
@@ -19,6 +24,11 @@ const getCasosExito = async (req, res) => {
         nombre: true,
         slug: true,
         casosExito: {
+          where: {
+            animal: {
+              estado: 'Adoptado' // Filtrar solo los que siguen adoptados
+            }
+          },
           select: {
             id: true,
             titulo: true,
@@ -63,6 +73,7 @@ const getCasosExito = async (req, res) => {
 /**
  * GET /api/casos-exito/:orgSlug
  * Listar casos de éxito de una organización específica
+ * Solo muestra casos donde el animal sigue con estado "Adoptado"
  */
 const getCasosExitoByOrg = async (req, res) => {
   try {
@@ -75,6 +86,11 @@ const getCasosExitoByOrg = async (req, res) => {
         nombre: true,
         slug: true,
         casosExito: {
+          where: {
+            animal: {
+              estado: 'Adoptado' // Solo casos de animales que siguen adoptados
+            }
+          },
           select: {
             id: true,
             titulo: true,
