@@ -115,16 +115,28 @@ const animalValidation = [
     .isBoolean().withMessage('estado_desparasitacion debe ser true o false'),
 
   body('socializa_perros')
-    .optional()
-    .isBoolean().withMessage('socializa_perros debe ser true o false'),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true
+      if (typeof value === 'boolean') return true
+      throw new Error('socializa_perros debe ser true, false o null')
+    }),
 
   body('socializa_gatos')
-    .optional()
-    .isBoolean().withMessage('socializa_gatos debe ser true o false'),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true
+      if (typeof value === 'boolean') return true
+      throw new Error('socializa_gatos debe ser true, false o null')
+    }),
 
   body('socializa_ninos')
-    .optional()
-    .isBoolean().withMessage('socializa_ninos debe ser true o false'),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true
+      if (typeof value === 'boolean') return true
+      throw new Error('socializa_ninos debe ser true, false o null')
+    }),
 
   handleValidationErrors
 ];
