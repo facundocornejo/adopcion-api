@@ -25,6 +25,9 @@ const casosExitoRoutes = require('./routes/casosexito.routes');
 // Crear la aplicación Express
 const app = express();
 
+// Confiar en el proxy de Render (necesario para rate-limit y obtener IP real)
+app.set('trust proxy', 1);
+
 // ============================================
 // MIDDLEWARES GLOBALES
 // ============================================
