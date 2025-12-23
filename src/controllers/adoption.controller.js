@@ -132,10 +132,13 @@ const createAdoptionRequest = async (req, res) => {
  * Obtener todas las solicitudes (PROTEGIDO - Admin)
  * GET /api/adoption-requests
  * Query params: ?estado=Nueva&animal_id=1
+ * - Superadmin: ve todas las solicitudes
+ * - Admin regular: solo ve solicitudes de animales de su organización
  */
 const getAdoptionRequests = async (req, res) => {
   try {
     const { estado_solicitud, animal_id } = req.query;
+    const { es_super_admin, organizacion_id } = req.admin;
 
     // Construir filtros
     const where = {};
@@ -148,6 +151,13 @@ const getAdoptionRequests = async (req, res) => {
       where.animal_id = parseInt(animal_id);
     }
 
+    // Si NO es superadmin, filtrar solo solicitudes de animales de su organización
+    if (!es_super_admin) {
+      where.animal = {
+        organizacion_id: organizacion_id
+      };
+    }
+
     const solicitudes = await prisma.solicitudAdopcion.findMany({
       where,
       include: {
@@ -157,7 +167,8 @@ const getAdoptionRequests = async (req, res) => {
             nombre: true,
             especie: true,
             foto_principal: true,
-            estado: true
+            estado: true,
+            organizacion_id: true
           }
         }
       },
@@ -187,10 +198,13 @@ const getAdoptionRequests = async (req, res) => {
 /**
  * Obtener una solicitud por ID (PROTEGIDO - Admin)
  * GET /api/adoption-requests/:id
+ * - Superadmin: puede ver cualquier solicitud
+ * - Admin regular: solo puede ver solicitudes de animales de su organización
  */
 const getAdoptionRequestById = async (req, res) => {
   try {
     const { id } = req.params;
+    const { es_super_admin, organizacion_id } = req.admin;
 
     const solicitud = await prisma.solicitudAdopcion.findUnique({
       where: { id: parseInt(id) },
@@ -204,7 +218,8 @@ const getAdoptionRequestById = async (req, res) => {
             edad_aproximada: true,
             foto_principal: true,
             estado: true,
-            contacto_rescatista: true
+            contacto_rescatista: true,
+            organizacion_id: true
           }
         }
       }
@@ -216,6 +231,17 @@ const getAdoptionRequestById = async (req, res) => {
         error: {
           code: 'NOT_FOUND',
           message: 'Solicitud no encontrada'
+        }
+      });
+    }
+
+    // Verificar que el admin tenga acceso a esta solicitud
+    if (!es_super_admin && solicitud.animal.organizacion_id !== organizacion_id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'No tenés permiso para ver esta solicitud'
         }
       });
     }
@@ -240,17 +266,20 @@ const getAdoptionRequestById = async (req, res) => {
 /**
  * Actualizar estado de solicitud (PROTEGIDO - Admin)
  * PATCH /api/adoption-requests/:id
+ * - Superadmin: puede actualizar cualquier solicitud
+ * - Admin regular: solo puede actualizar solicitudes de animales de su organización
  */
 const updateAdoptionRequestStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { estado_solicitud } = req.body;
+    const { es_super_admin, organizacion_id } = req.admin;
 
     // Verificar que existe
     const existingSolicitud = await prisma.solicitudAdopcion.findUnique({
       where: { id: parseInt(id) },
       include: {
-        animal: { select: { id: true, nombre: true } }
+        animal: { select: { id: true, nombre: true, organizacion_id: true } }
       }
     });
 
@@ -260,6 +289,17 @@ const updateAdoptionRequestStatus = async (req, res) => {
         error: {
           code: 'NOT_FOUND',
           message: 'Solicitud no encontrada'
+        }
+      });
+    }
+
+    // Verificar permisos
+    if (!es_super_admin && existingSolicitud.animal.organizacion_id !== organizacion_id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'No tenés permiso para modificar esta solicitud'
         }
       });
     }
@@ -305,14 +345,20 @@ const updateAdoptionRequestStatus = async (req, res) => {
 /**
  * Eliminar solicitud (PROTEGIDO - Admin)
  * DELETE /api/adoption-requests/:id
+ * - Superadmin: puede eliminar cualquier solicitud
+ * - Admin regular: solo puede eliminar solicitudes de animales de su organización
  */
 const deleteAdoptionRequest = async (req, res) => {
   try {
     const { id } = req.params;
+    const { es_super_admin, organizacion_id } = req.admin;
 
     // Verificar que existe
     const existingSolicitud = await prisma.solicitudAdopcion.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
+      include: {
+        animal: { select: { organizacion_id: true } }
+      }
     });
 
     if (!existingSolicitud) {
@@ -321,6 +367,17 @@ const deleteAdoptionRequest = async (req, res) => {
         error: {
           code: 'NOT_FOUND',
           message: 'Solicitud no encontrada'
+        }
+      });
+    }
+
+    // Verificar permisos
+    if (!es_super_admin && existingSolicitud.animal.organizacion_id !== organizacion_id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'No tenés permiso para eliminar esta solicitud'
         }
       });
     }
@@ -351,33 +408,43 @@ const deleteAdoptionRequest = async (req, res) => {
 /**
  * Obtener estadísticas de solicitudes (PROTEGIDO - Admin)
  * GET /api/adoption-requests/stats
+ * - Superadmin: ve estadísticas de todas las solicitudes
+ * - Admin regular: solo ve estadísticas de solicitudes de animales de su organización
  */
 const getAdoptionStats = async (req, res) => {
   try {
+    const { es_super_admin, organizacion_id } = req.admin;
+
+    // Filtro base para admins regulares
+    const baseWhere = !es_super_admin ? {
+      animal: { organizacion_id: organizacion_id }
+    } : {};
+
     // Contar por estado
-    const stats = await prisma.solicitudAdopcion.groupBy({
-      by: ['estado_solicitud'],
-      _count: { id: true }
+    const solicitudes = await prisma.solicitudAdopcion.findMany({
+      where: baseWhere,
+      select: {
+        estado_solicitud: true,
+        fecha_solicitud: true
+      }
+    });
+
+    // Calcular estadísticas manualmente (groupBy no soporta filtros relacionales)
+    const porEstado = {};
+    solicitudes.forEach(s => {
+      porEstado[s.estado_solicitud] = (porEstado[s.estado_solicitud] || 0) + 1;
     });
 
     // Total de solicitudes
-    const total = await prisma.solicitudAdopcion.count();
+    const total = solicitudes.length;
 
     // Solicitudes de los últimos 7 días
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const recentCount = await prisma.solicitudAdopcion.count({
-      where: {
-        fecha_solicitud: { gte: sevenDaysAgo }
-      }
-    });
-
-    // Formatear estadísticas por estado
-    const porEstado = {};
-    stats.forEach(s => {
-      porEstado[s.estado_solicitud] = s._count.id;
-    });
+    const recentCount = solicitudes.filter(s =>
+      new Date(s.fecha_solicitud) >= sevenDaysAgo
+    ).length;
 
     res.json({
       success: true,
