@@ -174,11 +174,7 @@ const createOrganization = async (req, res) => {
           username: result.administrador.username,
           email: result.administrador.email
         },
-        credenciales: {
-          username: admin_username,
-          password: admin_password // Devolvemos la contraseña para que se la envíen al rescatista
-        },
-        message: 'Organización y administrador creados correctamente'
+        message: 'Organización y administrador creados correctamente. Envíe las credenciales al rescatista de forma segura.'
       }
     });
 

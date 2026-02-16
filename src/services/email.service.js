@@ -1,6 +1,24 @@
 const transporter = require('../config/email');
 
 /**
+ * Escapar caracteres HTML para prevenir inyección
+ * @param {string} text - Texto a escapar
+ * @returns {string} Texto escapado
+ */
+const escapeHtml = (text) => {
+  if (text === null || text === undefined) return '';
+  const str = String(text);
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return str.replace(/[&<>"']/g, (char) => map[char]);
+};
+
+/**
  * Enviar email de notificación cuando llega una nueva solicitud de adopción
  * @param {Object} solicitud - Datos de la solicitud
  * @param {Object} animal - Datos del animal
@@ -30,51 +48,51 @@ const notificarNuevaSolicitud = async (solicitud, animal, organizacion = null) =
 
           <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2d3748; margin-top: 0;">Datos del Animal</h3>
-            <p><strong>Nombre:</strong> ${animal.nombre}</p>
-            <p><strong>Especie:</strong> ${animal.especie}</p>
-            <p><strong>ID:</strong> #${animal.id}</p>
+            <p><strong>Nombre:</strong> ${escapeHtml(animal.nombre)}</p>
+            <p><strong>Especie:</strong> ${escapeHtml(animal.especie)}</p>
+            <p><strong>ID:</strong> #${escapeHtml(animal.id)}</p>
           </div>
 
           <div style="background: #fff5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2d3748; margin-top: 0;">Datos del Solicitante</h3>
-            <p><strong>Nombre:</strong> ${solicitud.nombre_completo}</p>
-            <p><strong>Edad:</strong> ${solicitud.edad} años</p>
-            <p><strong>Email:</strong> <a href="mailto:${solicitud.email}">${solicitud.email}</a></p>
-            <p><strong>WhatsApp:</strong> ${solicitud.telefono_whatsapp}</p>
-            ${solicitud.instagram ? `<p><strong>Instagram:</strong> @${solicitud.instagram.replace('@', '')}</p>` : ''}
-            <p><strong>Ciudad/Zona:</strong> ${solicitud.ciudad_zona}</p>
+            <p><strong>Nombre:</strong> ${escapeHtml(solicitud.nombre_completo)}</p>
+            <p><strong>Edad:</strong> ${escapeHtml(solicitud.edad)} años</p>
+            <p><strong>Email:</strong> <a href="mailto:${escapeHtml(solicitud.email)}">${escapeHtml(solicitud.email)}</a></p>
+            <p><strong>WhatsApp:</strong> ${escapeHtml(solicitud.telefono_whatsapp)}</p>
+            ${solicitud.instagram ? `<p><strong>Instagram:</strong> @${escapeHtml(solicitud.instagram.replace('@', ''))}</p>` : ''}
+            <p><strong>Ciudad/Zona:</strong> ${escapeHtml(solicitud.ciudad_zona)}</p>
           </div>
 
           <div style="background: #f0fff4; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2d3748; margin-top: 0;">Información de Vivienda</h3>
-            <p><strong>Tipo de vivienda:</strong> ${solicitud.tipo_vivienda}</p>
-            <p><strong>Vive:</strong> ${solicitud.vive_solo_acompanado}</p>
+            <p><strong>Tipo de vivienda:</strong> ${escapeHtml(solicitud.tipo_vivienda)}</p>
+            <p><strong>Vive:</strong> ${escapeHtml(solicitud.vive_solo_acompanado)}</p>
             <p><strong>Todos de acuerdo:</strong> ${solicitud.todos_de_acuerdo ? 'Sí' : 'No'}</p>
           </div>
 
           <div style="background: #ebf8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2d3748; margin-top: 0;">Sobre Mascotas</h3>
             <p><strong>Tiene otros animales:</strong> ${solicitud.tiene_otros_animales ? 'Sí' : 'No'}</p>
-            ${solicitud.tiene_otros_animales ? `<p><strong>Están castrados:</strong> ${solicitud.otros_animales_castrados || 'No especificado'}</p>` : ''}
-            <p><strong>Experiencia previa:</strong> ${solicitud.experiencia_previa}</p>
+            ${solicitud.tiene_otros_animales ? `<p><strong>Están castrados:</strong> ${escapeHtml(solicitud.otros_animales_castrados) || 'No especificado'}</p>` : ''}
+            <p><strong>Experiencia previa:</strong> ${escapeHtml(solicitud.experiencia_previa)}</p>
           </div>
 
           <div style="background: #faf5ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2d3748; margin-top: 0;">Compromiso</h3>
             <p><strong>Puede cubrir gastos veterinarios:</strong> ${solicitud.puede_cubrir_gastos ? 'Sí' : 'No'}</p>
-            ${solicitud.veterinaria_que_usa ? `<p><strong>Veterinaria que usa:</strong> ${solicitud.veterinaria_que_usa}</p>` : ''}
+            ${solicitud.veterinaria_que_usa ? `<p><strong>Veterinaria que usa:</strong> ${escapeHtml(solicitud.veterinaria_que_usa)}</p>` : ''}
             <p><strong>Compromiso de castración:</strong> ${solicitud.compromiso_castracion ? 'Sí' : 'No'}</p>
           </div>
 
           <div style="background: #fffaf0; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2d3748; margin-top: 0;">Motivación</h3>
-            <p style="white-space: pre-wrap;">${solicitud.motivacion}</p>
+            <p style="white-space: pre-wrap;">${escapeHtml(solicitud.motivacion)}</p>
           </div>
 
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
           <p style="color: #718096; font-size: 14px;">
-            <strong>ID de Solicitud:</strong> #${solicitud.id}<br>
+            <strong>ID de Solicitud:</strong> #${escapeHtml(solicitud.id)}<br>
             <strong>Fecha:</strong> ${new Date(solicitud.fecha_solicitud).toLocaleString('es-AR', {
               timeZone: 'America/Argentina/Buenos_Aires',
               dateStyle: 'long',

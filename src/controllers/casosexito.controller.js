@@ -170,6 +170,18 @@ const createCasoExito = async (req, res) => {
       });
     }
 
+    // Validar que la fecha sea válida
+    const fechaAdopcionDate = new Date(fecha_adopcion);
+    if (isNaN(fechaAdopcionDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'La fecha de adopción no es válida'
+        }
+      });
+    }
+
     // Verificar que el animal existe y pertenece a la organización del admin
     const animal = await prisma.animal.findUnique({
       where: { id: parseInt(animal_id) }
@@ -220,7 +232,7 @@ const createCasoExito = async (req, res) => {
         foto_actual_1: foto_actual_1 || null,
         foto_actual_2: foto_actual_2 || null,
         foto_actual_3: foto_actual_3 || null,
-        fecha_adopcion: new Date(fecha_adopcion)
+        fecha_adopcion: fechaAdopcionDate
       },
       include: {
         animal: {
@@ -326,9 +338,77 @@ const updateCasoExito = async (req, res) => {
   }
 };
 
+/**
+ * DELETE /api/casos-exito/:id
+ * Eliminar un caso de éxito (requiere auth)
+ */
+const deleteCasoExito = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const casoId = parseInt(id, 10);
+
+    if (!Number.isInteger(casoId) || casoId < 1) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'El ID debe ser un número entero positivo'
+        }
+      });
+    }
+
+    // Verificar que el caso existe y pertenece a la organización
+    const existingCaso = await prisma.casoExito.findUnique({
+      where: { id: casoId }
+    });
+
+    if (!existingCaso) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Caso de éxito no encontrado'
+        }
+      });
+    }
+
+    if (existingCaso.organizacion_id !== req.admin.organizacion_id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'No tenés permiso para eliminar este caso de éxito'
+        }
+      });
+    }
+
+    await prisma.casoExito.delete({
+      where: { id: casoId }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        message: 'Caso de éxito eliminado correctamente'
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en deleteCasoExito:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Error al eliminar el caso de éxito'
+      }
+    });
+  }
+};
+
 module.exports = {
   getCasosExito,
   getCasosExitoByOrg,
   createCasoExito,
-  updateCasoExito
+  updateCasoExito,
+  deleteCasoExito
 };

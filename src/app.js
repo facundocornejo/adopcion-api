@@ -67,6 +67,35 @@ const loginLimiter = rateLimit({
   legacyHeaders: false
 });
 
+// Rate limiting estricto para endpoints públicos sensibles
+const adoptionRequestLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 10, // 10 solicitudes de adopción por hora por IP
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT',
+      message: 'Demasiadas solicitudes de adopción, esperá una hora'
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const contactRequestLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000, // 24 horas
+  max: 5, // 5 solicitudes de contacto por día por IP
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT',
+      message: 'Demasiadas solicitudes de contacto, esperá 24 horas'
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 // Aplicar rate limiting general
 app.use('/api', generalLimiter);
 
@@ -74,7 +103,7 @@ app.use('/api', generalLimiter);
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://adopcion-resposanble.vercel.app',
+  'https://adopcion-responsable.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -83,8 +112,8 @@ app.use(cors({
     // Permitir requests sin origin (como mobile apps o curl)
     if (!origin) return callback(null, true);
 
-    // Permitir cualquier subdominio de vercel.app que contenga "adopcion-resposanble"
-    if (origin.includes('adopcion-resposanble') && origin.endsWith('.vercel.app')) {
+    // Permitir cualquier subdominio de vercel.app que contenga "adopcion-responsable"
+    if (origin.includes('adopcion-responsable') && origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
 
@@ -149,9 +178,11 @@ app.use('/api/auth/login', loginLimiter); // Rate limit estricto para login
 app.use('/api/auth', authRoutes);
 app.use('/api/animals', animalsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.post('/api/adoption-requests', adoptionRequestLimiter); // Rate limit para crear solicitudes
 app.use('/api/adoption-requests', adoptionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/organization', organizationRoutes);
+app.post('/api/contact-requests', contactRequestLimiter); // Rate limit para solicitudes de contacto
 app.use('/api', superadminRoutes);
 app.use('/api/casos-exito', casosExitoRoutes);
 

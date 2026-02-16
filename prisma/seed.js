@@ -253,10 +253,9 @@ async function main() {
   console.log(animalesData.length + ' animales creados para ' + org1.nombre);
 
   console.log('\n========================================');
-  console.log('CREDENCIALES INICIALES (cambiar luego):');
-  console.log('Email: admin@adopcion.com');
-  console.log('Password: admin123');
-  console.log('Organizacion: ' + org1.nombre);
+  console.log('Seed completado exitosamente');
+  console.log('Admin creado para: ' + org1.nombre);
+  console.log('IMPORTANTE: Cambie la contraseña del admin en producción');
   console.log('========================================\n');
 }
 

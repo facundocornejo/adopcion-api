@@ -63,6 +63,27 @@ const createAdoptionRequest = async (req, res) => {
       });
     }
 
+    // Verificar idempotencia: prevenir solicitudes duplicadas del mismo email para el mismo animal
+    const solicitudExistente = await prisma.solicitudAdopcion.findFirst({
+      where: {
+        animal_id: parseInt(animal_id),
+        email: email.toLowerCase().trim(),
+        fecha_solicitud: {
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Últimos 7 días
+        }
+      }
+    });
+
+    if (solicitudExistente) {
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'DUPLICATE_REQUEST',
+          message: 'Ya enviaste una solicitud para este animal recientemente. Por favor esperá a que la organización te contacte.'
+        }
+      });
+    }
+
     // Crear la solicitud
     const solicitud = await prisma.solicitudAdopcion.create({
       data: {
@@ -137,8 +158,13 @@ const createAdoptionRequest = async (req, res) => {
  */
 const getAdoptionRequests = async (req, res) => {
   try {
-    const { estado_solicitud, animal_id } = req.query;
+    const { estado_solicitud, animal_id, page, limit } = req.query;
     const { es_super_admin, organizacion_id } = req.admin;
+
+    // Paginación con valores por defecto
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
 
     // Construir filtros
     const where = {};
@@ -148,7 +174,10 @@ const getAdoptionRequests = async (req, res) => {
     }
 
     if (animal_id) {
-      where.animal_id = parseInt(animal_id);
+      const animalIdNum = parseInt(animal_id, 10);
+      if (Number.isInteger(animalIdNum) && animalIdNum > 0) {
+        where.animal_id = animalIdNum;
+      }
     }
 
     // Si NO es superadmin, filtrar solo solicitudes de animales de su organización
@@ -158,28 +187,37 @@ const getAdoptionRequests = async (req, res) => {
       };
     }
 
-    const solicitudes = await prisma.solicitudAdopcion.findMany({
-      where,
-      include: {
-        animal: {
-          select: {
-            id: true,
-            nombre: true,
-            especie: true,
-            foto_principal: true,
-            estado: true,
-            organizacion_id: true
+    // Ejecutar consulta y conteo en paralelo
+    const [solicitudes, total] = await Promise.all([
+      prisma.solicitudAdopcion.findMany({
+        where,
+        include: {
+          animal: {
+            select: {
+              id: true,
+              nombre: true,
+              especie: true,
+              foto_principal: true,
+              estado: true,
+              organizacion_id: true
+            }
           }
-        }
-      },
-      orderBy: { fecha_solicitud: 'desc' }
-    });
+        },
+        orderBy: { fecha_solicitud: 'desc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.solicitudAdopcion.count({ where })
+    ]);
 
     res.json({
       success: true,
       data: {
         solicitudes,
-        total: solicitudes.length
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
       }
     });
 

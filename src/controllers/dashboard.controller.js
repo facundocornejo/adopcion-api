@@ -6,6 +6,12 @@ const prisma = require('../config/database');
  */
 const getDashboardStats = async (req, res) => {
   try {
+    const { es_super_admin, organizacion_id } = req.admin;
+
+    // Filtro base: superadmin ve todo, admin regular solo su organización
+    const animalWhere = es_super_admin ? {} : { organizacion_id };
+    const solicitudWhere = es_super_admin ? {} : { animal: { organizacion_id } };
+
     // Ejecutar todas las consultas en paralelo para mejor rendimiento
     const [
       totalAnimales,
@@ -16,26 +22,29 @@ const getDashboardStats = async (req, res) => {
       animalesRecientes
     ] = await Promise.all([
       // Total de animales
-      prisma.animal.count(),
+      prisma.animal.count({ where: animalWhere }),
 
       // Animales agrupados por estado
       prisma.animal.groupBy({
         by: ['estado'],
+        where: animalWhere,
         _count: { id: true }
       }),
 
       // Total de solicitudes
-      prisma.solicitudAdopcion.count(),
+      prisma.solicitudAdopcion.count({ where: solicitudWhere }),
 
       // Solicitudes agrupadas por estado
       prisma.solicitudAdopcion.groupBy({
         by: ['estado_solicitud'],
+        where: solicitudWhere,
         _count: { id: true }
       }),
 
       // Solicitudes de los últimos 7 días
       prisma.solicitudAdopcion.count({
         where: {
+          ...solicitudWhere,
           fecha_solicitud: {
             gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
           }
@@ -45,6 +54,7 @@ const getDashboardStats = async (req, res) => {
       // Animales publicados en los últimos 30 días
       prisma.animal.count({
         where: {
+          ...animalWhere,
           fecha_publicacion: {
             gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
           }

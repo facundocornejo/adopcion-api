@@ -76,6 +76,17 @@ const updateMyOrganization = async (req, res) => {
       donacion_info
     } = req.body;
 
+    // Validar formato de email si se proporciona
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'El formato del email no es válido'
+        }
+      });
+    }
+
     const organizacion = await prisma.organizacion.update({
       where: { id: req.admin.organizacion_id },
       data: {

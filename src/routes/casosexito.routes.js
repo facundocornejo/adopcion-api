@@ -5,7 +5,8 @@ const {
   getCasosExito,
   getCasosExitoByOrg,
   createCasoExito,
-  updateCasoExito
+  updateCasoExito,
+  deleteCasoExito
 } = require('../controllers/casosexito.controller');
 
 /**
@@ -134,5 +135,30 @@ router.post('/', verificarToken, createCasoExito);
  *         description: Caso no encontrado
  */
 router.put('/:id', verificarToken, updateCasoExito);
+
+/**
+ * @swagger
+ * /api/casos-exito/{id}:
+ *   delete:
+ *     summary: Eliminar un caso de éxito
+ *     tags: [Casos de Éxito]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del caso de éxito
+ *     responses:
+ *       200:
+ *         description: Caso de éxito eliminado
+ *       404:
+ *         description: Caso no encontrado
+ *       403:
+ *         description: Sin permisos
+ */
+router.delete('/:id', verificarToken, deleteCasoExito);
 
 module.exports = router;

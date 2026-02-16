@@ -215,8 +215,9 @@ const adoptionRequestValidation = [
   body('todos_de_acuerdo')
     .notEmpty().withMessage('Debes indicar si todos están de acuerdo')
     .isBoolean().withMessage('Debe ser true o false')
+    .toBoolean()
     .custom((value) => {
-      if (value !== true && value !== 'true') {
+      if (value !== true) {
         throw new Error('Todos los miembros del hogar deben estar de acuerdo');
       }
       return true;
@@ -253,8 +254,9 @@ const adoptionRequestValidation = [
   body('compromiso_castracion')
     .notEmpty().withMessage('Debes aceptar el compromiso de castración')
     .isBoolean().withMessage('Debe ser true o false')
+    .toBoolean()
     .custom((value) => {
-      if (value !== true && value !== 'true') {
+      if (value !== true) {
         throw new Error('Debes aceptar el compromiso de castración');
       }
       return true;

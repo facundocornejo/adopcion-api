@@ -15,7 +15,13 @@
     "db:push": "npx prisma db push",
     "db:seed": "node prisma/seed.js",
     "set-super-admin": "node prisma/set-super-admin.js",
-    "db:studio": "npx prisma studio"
+    "db:studio": "npx prisma studio",
+    "test:security": "node tests/security/security_audit.js",
+    "test:load": "k6 run tests/performance/load_test.js",
+    "test:load:browsing": "k6 run --env SCENARIO=browsing tests/performance/load_test.js",
+    "test:load:submission": "k6 run --env SCENARIO=submission tests/performance/load_test.js",
+    "test:load:stress": "k6 run --env SCENARIO=stress tests/performance/load_test.js",
+    "test:load:spike": "k6 run --env SCENARIO=spike tests/performance/load_test.js"
   },
   "keywords": [
     "adopcion",
@@ -43,6 +49,7 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "axios": "^1.13.5",
     "nodemon": "^3.1.7"
   }
 }
