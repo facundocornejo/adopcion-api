@@ -63,18 +63,22 @@ const createAdoptionRequest = async (req, res) => {
       });
     }
 
+    // Normalizar email para consistencia
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Verificar idempotencia: prevenir solicitudes duplicadas del mismo email para el mismo animal
-    const solicitudExistente = await prisma.solicitudAdopcion.findFirst({
+    // Primero verificamos si hay una solicitud reciente (últimos 7 días)
+    const solicitudReciente = await prisma.solicitudAdopcion.findFirst({
       where: {
         animal_id: parseInt(animal_id),
-        email: email.toLowerCase().trim(),
+        email: normalizedEmail,
         fecha_solicitud: {
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Últimos 7 días
         }
       }
     });
 
-    if (solicitudExistente) {
+    if (solicitudReciente) {
       return res.status(409).json({
         success: false,
         error: {
@@ -84,33 +88,48 @@ const createAdoptionRequest = async (req, res) => {
       });
     }
 
-    // Crear la solicitud
-    const solicitud = await prisma.solicitudAdopcion.create({
-      data: {
-        animal_id: parseInt(animal_id),
-        nombre_completo,
-        edad: parseInt(edad),
-        email,
-        telefono_whatsapp,
-        instagram: instagram || null,
-        ciudad_zona,
-        tipo_vivienda,
-        vive_solo_acompanado,
-        todos_de_acuerdo: Boolean(todos_de_acuerdo),
-        tiene_otros_animales: Boolean(tiene_otros_animales),
-        otros_animales_castrados: otros_animales_castrados || null,
-        experiencia_previa,
-        puede_cubrir_gastos: Boolean(puede_cubrir_gastos),
-        veterinaria_que_usa: veterinaria_que_usa || null,
-        motivacion,
-        compromiso_castracion: Boolean(compromiso_castracion),
-        acepta_contacto: acepta_contacto !== false
-      },
-      include: {
-        animal: {
-          select: { id: true, nombre: true, especie: true }
+    // Si existe una solicitud antigua (más de 7 días), la eliminamos para permitir una nueva
+    // Esto se hace dentro de una transacción para evitar race conditions
+    const solicitud = await prisma.$transaction(async (tx) => {
+      // Eliminar solicitud antigua si existe (más de 7 días)
+      await tx.solicitudAdopcion.deleteMany({
+        where: {
+          animal_id: parseInt(animal_id),
+          email: normalizedEmail,
+          fecha_solicitud: {
+            lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          }
         }
-      }
+      });
+
+      // Crear la nueva solicitud
+      return await tx.solicitudAdopcion.create({
+        data: {
+          animal_id: parseInt(animal_id),
+          nombre_completo,
+          edad: parseInt(edad),
+          email: normalizedEmail,
+          telefono_whatsapp,
+          instagram: instagram || null,
+          ciudad_zona,
+          tipo_vivienda,
+          vive_solo_acompanado,
+          todos_de_acuerdo: Boolean(todos_de_acuerdo),
+          tiene_otros_animales: Boolean(tiene_otros_animales),
+          otros_animales_castrados: otros_animales_castrados || null,
+          experiencia_previa,
+          puede_cubrir_gastos: Boolean(puede_cubrir_gastos),
+          veterinaria_que_usa: veterinaria_que_usa || null,
+          motivacion,
+          compromiso_castracion: Boolean(compromiso_castracion),
+          acepta_contacto: acepta_contacto !== false
+        },
+        include: {
+          animal: {
+            select: { id: true, nombre: true, especie: true }
+          }
+        }
+      });
     });
 
     // Enviar email de notificación a la organización (async, no bloquea la respuesta)
@@ -139,6 +158,18 @@ const createAdoptionRequest = async (req, res) => {
 
   } catch (error) {
     console.error('Error al crear solicitud:', error);
+
+    // Manejar error de unique constraint (race condition)
+    if (error.code === 'P2002') {
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'DUPLICATE_REQUEST',
+          message: 'Ya enviaste una solicitud para este animal. Por favor esperá a que la organización te contacte.'
+        }
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: {

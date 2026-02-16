@@ -64,6 +64,8 @@ model Administrador {
   // Relación: un admin puede publicar muchos animales
   animales Animal[]
 
+  // Índice para queries de admins por organización
+  @@index([organizacion_id])
   @@map("administrador")
 }
 
@@ -100,6 +102,7 @@ model Animal {
   foto_5                 String?  @db.VarChar(255)
   fecha_publicacion      DateTime @default(now())
   fecha_actualizacion    DateTime @updatedAt
+  deleted_at             DateTime? // Soft delete - null = activo
 
   // Relación: pertenece a una organización
   organizacion Organizacion @relation(fields: [organizacion_id], references: [id])
@@ -113,6 +116,10 @@ model Animal {
   // Relación: puede tener un caso de éxito (si fue adoptado)
   casoExito CasoExito?
 
+  // Índices para mejorar performance de queries frecuentes
+  @@index([estado])
+  @@index([especie])
+  @@index([organizacion_id])
   @@map("animal")
 }
 
@@ -146,6 +153,12 @@ model SolicitudAdopcion {
   // Relación: pertenece a un animal
   animal Animal @relation(fields: [animal_id], references: [id])
 
+  // Índice único para prevenir solicitudes duplicadas (mismo email + animal en período corto)
+  // La lógica de tiempo se maneja en el controller, esto previene race conditions
+  @@unique([animal_id, email], name: "unique_adoption_request")
+  @@index([email])
+  @@index([animal_id])
+  @@index([estado_solicitud])
   @@map("solicitud_adopcion")
 }
 
@@ -169,6 +182,8 @@ model SolicitudContacto {
   fecha_solicitud   DateTime @default(now())
   fecha_respuesta   DateTime?
 
+  // Índice para filtrar por estado
+  @@index([estado])
   @@map("solicitud_contacto")
 }
 
@@ -194,5 +209,33 @@ model CasoExito {
   // Relación: pertenece a una organización
   organizacion Organizacion @relation(fields: [organizacion_id], references: [id])
 
+  // Índice para filtrar por organización
+  @@index([organizacion_id])
   @@map("caso_exito")
+}
+
+// ============================================
+// TABLA: audit_log
+// Registro de acciones para auditoría
+// ============================================
+model AuditLog {
+  id              Int      @id @default(autoincrement())
+  timestamp       DateTime @default(now())
+  admin_id        Int?     // Puede ser null si es acción de sistema
+  admin_username  String?  @db.VarChar(50)
+  organizacion_id Int?
+  action          String   @db.VarChar(50) // CREATE, UPDATE, DELETE, LOGIN, etc.
+  entity_type     String   @db.VarChar(50) // Animal, SolicitudAdopcion, etc.
+  entity_id       Int?
+  old_values      Json?    // Valores anteriores (para updates)
+  new_values      Json?    // Valores nuevos
+  ip_address      String?  @db.VarChar(45) // IPv4 o IPv6
+  user_agent      String?  @db.VarChar(500)
+
+  // Índices para consultas frecuentes
+  @@index([timestamp])
+  @@index([admin_id])
+  @@index([entity_type, entity_id])
+  @@index([action])
+  @@map("audit_log")
 }

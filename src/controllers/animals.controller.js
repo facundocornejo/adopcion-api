@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAudit, AUDIT_ACTIONS, ENTITY_TYPES } = require('../services/audit.service');
 
 // GET /api/animals - Listar animales
 const getAnimals = async (req, res) => {
@@ -12,6 +13,9 @@ const getAnimals = async (req, res) => {
 
     // Construir filtros
     const where = {};
+
+    // Siempre excluir eliminados (soft delete)
+    where.deleted_at = null;
 
     // Si está autenticado, filtrar por su organización
     if (req.admin) {
@@ -96,8 +100,11 @@ const getAnimalById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const animal = await prisma.animal.findUnique({
-      where: { id: parseInt(id) },
+    const animal = await prisma.animal.findFirst({
+      where: {
+        id: parseInt(id),
+        deleted_at: null // Excluir eliminados
+      },
       include: {
         organizacion: {
           select: {
@@ -210,6 +217,16 @@ const createAnimal = async (req, res) => {
       }
     });
 
+    // Registrar en audit log
+    logAudit({
+      action: AUDIT_ACTIONS.CREATE,
+      entityType: ENTITY_TYPES.ANIMAL,
+      entityId: animal.id,
+      admin: req.admin,
+      newValues: { nombre, especie, estado: 'Disponible' },
+      req
+    });
+
     res.status(201).json({
       success: true,
       data: {
@@ -279,8 +296,11 @@ const updateAnimal = async (req, res) => {
 
     // Usar transacción para evitar race conditions
     const animal = await prisma.$transaction(async (tx) => {
-      const existingAnimal = await tx.animal.findUnique({
-        where: { id: animalId }
+      const existingAnimal = await tx.animal.findFirst({
+        where: {
+          id: animalId,
+          deleted_at: null // Solo buscar no eliminados
+        }
       });
 
       if (!existingAnimal) {
@@ -323,6 +343,16 @@ const updateAnimal = async (req, res) => {
           foto_5: foto_5 !== undefined ? foto_5 : existingAnimal.foto_5
         }
       });
+    });
+
+    // Registrar en audit log
+    logAudit({
+      action: AUDIT_ACTIONS.UPDATE,
+      entityType: ENTITY_TYPES.ANIMAL,
+      entityId: animalId,
+      admin: req.admin,
+      newValues: { nombre, especie, estado },
+      req
     });
 
     res.json({
@@ -372,9 +402,12 @@ const updateAnimalStatus = async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
 
-    // Verificar que el animal existe
-    const existingAnimal = await prisma.animal.findUnique({
-      where: { id: parseInt(id) }
+    // Verificar que el animal existe y no está eliminado
+    const existingAnimal = await prisma.animal.findFirst({
+      where: {
+        id: parseInt(id),
+        deleted_at: null
+      }
     });
 
     if (!existingAnimal) {
@@ -397,6 +430,8 @@ const updateAnimalStatus = async (req, res) => {
       });
     }
 
+    const oldEstado = existingAnimal.estado;
+
     const animal = await prisma.animal.update({
       where: { id: parseInt(id) },
       data: { estado },
@@ -405,6 +440,17 @@ const updateAnimalStatus = async (req, res) => {
         nombre: true,
         estado: true
       }
+    });
+
+    // Registrar cambio de estado en audit log
+    logAudit({
+      action: AUDIT_ACTIONS.STATUS_CHANGE,
+      entityType: ENTITY_TYPES.ANIMAL,
+      entityId: parseInt(id),
+      admin: req.admin,
+      oldValues: { estado: oldEstado },
+      newValues: { estado },
+      req
     });
 
     res.json({
@@ -427,7 +473,7 @@ const updateAnimalStatus = async (req, res) => {
   }
 };
 
-// DELETE /api/animals/:id - Eliminar animal (protegido)
+// DELETE /api/animals/:id - Eliminar animal (protegido) - Soft delete
 const deleteAnimal = async (req, res) => {
   try {
     const { id } = req.params;
@@ -444,9 +490,12 @@ const deleteAnimal = async (req, res) => {
     }
 
     // Usar transacción para evitar race conditions
-    await prisma.$transaction(async (tx) => {
-      const existingAnimal = await tx.animal.findUnique({
-        where: { id: animalId }
+    const deletedAnimal = await prisma.$transaction(async (tx) => {
+      const existingAnimal = await tx.animal.findFirst({
+        where: {
+          id: animalId,
+          deleted_at: null // Solo buscar no eliminados
+        }
       });
 
       if (!existingAnimal) {
@@ -461,9 +510,23 @@ const deleteAnimal = async (req, res) => {
         throw error;
       }
 
-      await tx.animal.delete({
-        where: { id: animalId }
+      // Soft delete: marcar fecha de eliminación en lugar de borrar
+      await tx.animal.update({
+        where: { id: animalId },
+        data: { deleted_at: new Date() }
       });
+
+      return existingAnimal; // Retornar para el audit log
+    });
+
+    // Registrar eliminación en audit log
+    logAudit({
+      action: AUDIT_ACTIONS.DELETE,
+      entityType: ENTITY_TYPES.ANIMAL,
+      entityId: animalId,
+      admin: req.admin,
+      oldValues: { nombre: deletedAnimal.nombre, estado: deletedAnimal.estado },
+      req
     });
 
     res.json({
@@ -492,17 +555,6 @@ const deleteAnimal = async (req, res) => {
         error: {
           code: 'FORBIDDEN',
           message: error.message
-        }
-      });
-    }
-
-    // Error de foreign key (tiene solicitudes asociadas)
-    if (error.code === 'P2003') {
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'HAS_DEPENDENCIES',
-          message: 'No se puede eliminar el animal porque tiene solicitudes de adopción asociadas'
         }
       });
     }

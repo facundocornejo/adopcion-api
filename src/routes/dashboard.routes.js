@@ -42,8 +42,19 @@ const { verificarToken } = require('../middlewares/auth.middleware');
  */
 router.get('/stats', verificarToken, getDashboardStats);
 
-// Endpoint temporal para seed (BORRAR EN PRODUCCIÓN)
+// Endpoint temporal para seed (SOLO DESARROLLO)
 router.post('/seed-animals', verificarToken, async (req, res) => {
+  // Bloquear en producción
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Este endpoint no está disponible en producción'
+      }
+    });
+  }
+
   try {
     // Eliminar animales existentes
     await prisma.animal.deleteMany({});

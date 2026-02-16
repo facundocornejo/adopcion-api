@@ -35,3 +35,6 @@ temp/
 
 # Documentación interna (no subir a Git)
 docs/
+
+# Test coverage
+coverage/

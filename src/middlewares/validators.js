@@ -174,7 +174,7 @@ const adoptionRequestValidation = [
 
   body('edad')
     .notEmpty().withMessage('La edad es obligatoria')
-    .isInt({ min: 18 }).withMessage('Debes ser mayor de 18 años para adoptar'),
+    .isInt({ min: 18, max: 120 }).withMessage('La edad debe estar entre 18 y 120 años'),
 
   body('email')
     .trim()

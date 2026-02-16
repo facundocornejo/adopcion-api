@@ -104,6 +104,18 @@ const createOrganization = async (req, res) => {
       });
     }
 
+    // Validar política de contraseñas: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&_\-#]{8,}$/;
+    if (!passwordRegex.test(admin_password)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'WEAK_PASSWORD',
+          message: 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula y un número'
+        }
+      });
+    }
+
     // Generar slug único
     let slug = nombre
       .toLowerCase()

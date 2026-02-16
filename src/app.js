@@ -1,6 +1,10 @@
 // Cargar variables de entorno PRIMERO (antes que cualquier otra cosa)
 require('dotenv').config();
 
+// Validar variables de entorno antes de continuar
+const validateEnv = require('./config/validateEnv');
+validateEnv();
+
 // Importar dependencias
 const express = require('express');
 const cors = require('cors');
@@ -222,7 +226,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`
   =============================================
   Servidor corriendo en http://localhost:${PORT}
@@ -231,9 +235,37 @@ app.listen(PORT, () => {
   `);
 });
 
-// Manejar cierre graceful de la aplicación
-process.on('SIGINT', async () => {
-  console.log('\nCerrando conexión a la base de datos...');
-  await prisma.$disconnect();
-  process.exit(0);
-});
+// ============================================
+// GRACEFUL SHUTDOWN
+// ============================================
+
+async function gracefulShutdown(signal) {
+  console.log(`\n${signal} recibido. Iniciando cierre graceful...`);
+
+  // Dejar de aceptar nuevas conexiones
+  server.close(async () => {
+    console.log('Servidor HTTP cerrado.');
+
+    try {
+      // Cerrar conexión a la base de datos
+      await prisma.$disconnect();
+      console.log('Conexión a base de datos cerrada.');
+      process.exit(0);
+    } catch (error) {
+      console.error('Error durante el cierre:', error);
+      process.exit(1);
+    }
+  });
+
+  // Forzar cierre si tarda más de 10 segundos
+  setTimeout(() => {
+    console.error('Cierre forzado por timeout');
+    process.exit(1);
+  }, 10000);
+}
+
+// SIGINT: Ctrl+C en terminal
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// SIGTERM: Señal de terminación (Docker, Kubernetes, etc.)
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
