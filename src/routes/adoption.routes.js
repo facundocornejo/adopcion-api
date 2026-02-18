@@ -35,9 +35,29 @@ const {
  *             $ref: '#/components/schemas/SolicitudInput'
  *     responses:
  *       201:
- *         description: Solicitud creada
+ *         description: Solicitud creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/SolicitudAdopcion'
  *       400:
  *         description: Error de validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/', adoptionRequestValidation, createAdoptionRequest);
 
@@ -51,7 +71,34 @@ router.post('/', adoptionRequestValidation, createAdoptionRequest);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Estadísticas
+ *         description: Estadísticas de solicitudes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     por_estado:
+ *                       type: object
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/stats', verificarToken, getAdoptionStats);
 
@@ -59,7 +106,7 @@ router.get('/stats', verificarToken, getAdoptionStats);
  * @swagger
  * /api/adoption-requests:
  *   get:
- *     summary: Listar solicitudes
+ *     summary: Listar solicitudes de adopción
  *     tags: [Solicitudes]
  *     security:
  *       - bearerAuth: []
@@ -68,13 +115,40 @@ router.get('/stats', verificarToken, getAdoptionStats);
  *         name: estado_solicitud
  *         schema:
  *           type: string
+ *           enum: [Nueva, Revisada, En evaluación, Aprobada, Rechazada]
+ *         description: Filtrar por estado
  *       - in: query
  *         name: animal_id
  *         schema:
  *           type: integer
+ *         description: Filtrar por animal
  *     responses:
  *       200:
  *         description: Lista de solicitudes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/SolicitudAdopcion'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/', verificarToken, getAdoptionRequests);
 
@@ -92,11 +166,38 @@ router.get('/', verificarToken, getAdoptionRequests);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la solicitud
  *     responses:
  *       200:
- *         description: Detalle de solicitud
+ *         description: Detalle de la solicitud
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/SolicitudAdopcion'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
- *         description: No encontrada
+ *         description: Solicitud no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/:id', verificarToken, idParamValidation, getAdoptionRequestById);
 
@@ -114,18 +215,56 @@ router.get('/:id', verificarToken, idParamValidation, getAdoptionRequestById);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la solicitud
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - estado_solicitud
  *             properties:
  *               estado_solicitud:
  *                 type: string
  *                 enum: [Nueva, Revisada, En evaluación, Aprobada, Rechazada]
  *     responses:
  *       200:
- *         description: Estado actualizado
+ *         description: Estado actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/SolicitudAdopcion'
+ *       400:
+ *         description: Estado inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Solicitud no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.patch('/:id', verificarToken, idParamValidation, adoptionStatusValidation, updateAdoptionRequestStatus);
 
@@ -133,7 +272,7 @@ router.patch('/:id', verificarToken, idParamValidation, adoptionStatusValidation
  * @swagger
  * /api/adoption-requests/{id}:
  *   delete:
- *     summary: Eliminar solicitud
+ *     summary: Eliminar solicitud de adopción
  *     tags: [Solicitudes]
  *     security:
  *       - bearerAuth: []
@@ -143,9 +282,39 @@ router.patch('/:id', verificarToken, idParamValidation, adoptionStatusValidation
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la solicitud
  *     responses:
  *       200:
- *         description: Solicitud eliminada
+ *         description: Solicitud eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Solicitud eliminada correctamente
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Solicitud no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:id', verificarToken, idParamValidation, deleteAdoptionRequest);
 

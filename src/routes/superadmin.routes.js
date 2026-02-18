@@ -38,25 +38,60 @@ const {
  *             properties:
  *               nombre_refugio:
  *                 type: string
+ *                 example: "Refugio Huellitas"
  *               nombre_contacto:
  *                 type: string
+ *                 example: "María García"
  *               email:
  *                 type: string
+ *                 format: email
+ *                 example: "maria@huellitas.org"
  *               telefono:
  *                 type: string
+ *                 example: "+54 343 555-5678"
  *               ciudad:
  *                 type: string
+ *                 example: "Paraná, Entre Ríos"
  *               descripcion:
  *                 type: string
+ *                 example: "Somos un refugio con 5 años de experiencia..."
  *               instagram:
  *                 type: string
+ *                 example: "@huellitas_parana"
  *               facebook:
  *                 type: string
+ *                 example: "huellitasparana"
  *               cantidad_animales:
  *                 type: string
+ *                 example: "Aproximadamente 30 animales"
  *     responses:
  *       201:
- *         description: Solicitud creada
+ *         description: Solicitud creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                 message:
+ *                   type: string
+ *                   example: Solicitud enviada correctamente
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/contact-requests', createContactRequest);
 
@@ -74,7 +109,48 @@ router.post('/contact-requests', createContactRequest);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de organizaciones
+ *         description: Lista de todas las organizaciones
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       nombre:
+ *                         type: string
+ *                       slug:
+ *                         type: string
+ *                       activa:
+ *                         type: boolean
+ *                       _count:
+ *                         type: object
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/super-admin/organizations', verificarToken, verificarSuperAdmin, getOrganizations);
 
@@ -100,8 +176,10 @@ router.get('/super-admin/organizations', verificarToken, verificarSuperAdmin, ge
  *             properties:
  *               nombre:
  *                 type: string
+ *                 example: "Refugio Nuevo"
  *               email:
  *                 type: string
+ *                 format: email
  *               telefono:
  *                 type: string
  *               direccion:
@@ -110,13 +188,57 @@ router.get('/super-admin/organizations', verificarToken, verificarSuperAdmin, ge
  *                 type: string
  *               admin_username:
  *                 type: string
+ *                 example: "admin_nuevo"
  *               admin_email:
  *                 type: string
+ *                 format: email
+ *                 example: "admin@nuevo.org"
  *               admin_password:
  *                 type: string
+ *                 format: password
+ *                 example: "password123"
  *     responses:
  *       201:
- *         description: Organización creada
+ *         description: Organización y administrador creados exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     organizacion:
+ *                       type: object
+ *                     administrador:
+ *                       type: object
+ *       400:
+ *         description: Datos inválidos o email ya existe
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/super-admin/organizations', verificarToken, verificarSuperAdmin, createOrganization);
 
@@ -134,9 +256,52 @@ router.post('/super-admin/organizations', verificarToken, verificarSuperAdmin, c
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la organización
  *     responses:
  *       200:
- *         description: Organización actualizada
+ *         description: Estado de la organización actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     activa:
+ *                       type: boolean
+ *                 message:
+ *                   type: string
+ *                   example: Organización desactivada correctamente
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Organización no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.put('/super-admin/organizations/:id/toggle', verificarToken, verificarSuperAdmin, toggleOrganization);
 
@@ -154,9 +319,45 @@ router.put('/super-admin/organizations/:id/toggle', verificarToken, verificarSup
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la organización
  *     responses:
  *       200:
- *         description: Organización eliminada
+ *         description: Organización eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Organización eliminada correctamente
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Organización no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete('/super-admin/organizations/:id', verificarToken, verificarSuperAdmin, deleteOrganization);
 
@@ -174,9 +375,54 @@ router.delete('/super-admin/organizations/:id', verificarToken, verificarSuperAd
  *         schema:
  *           type: string
  *           enum: [Pendiente, Aprobada, Rechazada]
+ *         description: Filtrar por estado
  *     responses:
  *       200:
- *         description: Lista de solicitudes
+ *         description: Lista de solicitudes de contacto
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       nombre_refugio:
+ *                         type: string
+ *                       nombre_contacto:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       estado:
+ *                         type: string
+ *                       fecha_solicitud:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/super-admin/contact-requests', verificarToken, verificarSuperAdmin, getContactRequests);
 
@@ -184,7 +430,7 @@ router.get('/super-admin/contact-requests', verificarToken, verificarSuperAdmin,
  * @swagger
  * /api/super-admin/contact-requests/{id}:
  *   put:
- *     summary: Actualizar estado de solicitud
+ *     summary: Actualizar estado de solicitud de contacto
  *     tags: [Super Admin]
  *     security:
  *       - bearerAuth: []
@@ -194,7 +440,9 @@ router.get('/super-admin/contact-requests', verificarToken, verificarSuperAdmin,
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la solicitud
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -205,9 +453,50 @@ router.get('/super-admin/contact-requests', verificarToken, verificarSuperAdmin,
  *                 enum: [Pendiente, Aprobada, Rechazada]
  *               notas_admin:
  *                 type: string
+ *                 example: "Aprobada después de verificar referencias"
  *     responses:
  *       200:
- *         description: Solicitud actualizada
+ *         description: Solicitud actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Estado inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Solicitud no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.put('/super-admin/contact-requests/:id', verificarToken, verificarSuperAdmin, updateContactRequest);
 

@@ -72,17 +72,21 @@ const handleMulterError = (err, req, res, next) => {
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - file
  *             properties:
  *               file:
  *                 type: string
  *                 format: binary
+ *                 description: Imagen a subir (JPG, JPEG, PNG, WEBP). Máx 5MB
  *     responses:
  *       200:
- *         description: Imagen subida
+ *         description: Imagen subida exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -90,13 +94,35 @@ const handleMulterError = (err, req, res, next) => {
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 data:
  *                   type: object
  *                   properties:
  *                     url:
  *                       type: string
+ *                       format: uri
+ *                       example: "https://res.cloudinary.com/xxx/image/upload/v123/animals/abc123.jpg"
  *                     public_id:
  *                       type: string
+ *                       example: "animals/abc123"
+ *       400:
+ *         description: Error en el archivo (formato inválido o tamaño excedido)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/', verificarToken, upload.single('file'), handleMulterError, uploadImage);
 
@@ -114,9 +140,40 @@ router.post('/', verificarToken, upload.single('file'), handleMulterError, uploa
  *         required: true
  *         schema:
  *           type: string
+ *         description: Public ID de la imagen en Cloudinary
+ *         example: "animals/abc123"
  *     responses:
  *       200:
- *         description: Imagen eliminada
+ *         description: Imagen eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Imagen eliminada correctamente
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Imagen no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:publicId', verificarToken, deleteImage);
 

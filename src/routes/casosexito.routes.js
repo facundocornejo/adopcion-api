@@ -25,6 +25,29 @@ const {
  *     responses:
  *       200:
  *         description: Lista de casos de éxito por organización
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       organizacion:
+ *                         type: object
+ *                       casos:
+ *                         type: array
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/', getCasosExito);
 
@@ -44,8 +67,33 @@ router.get('/', getCasosExito);
  *     responses:
  *       200:
  *         description: Casos de éxito de la organización
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     organizacion:
+ *                       type: object
+ *                     casos:
+ *                       type: array
  *       404:
  *         description: Organización no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/:orgSlug', getCasosExitoByOrg);
 
@@ -71,26 +119,57 @@ router.get('/:orgSlug', getCasosExitoByOrg);
  *             properties:
  *               animal_id:
  *                 type: integer
+ *                 description: ID del animal adoptado
  *               titulo:
  *                 type: string
+ *                 example: "Luna encontró su hogar"
  *               historia:
  *                 type: string
+ *                 example: "Después de meses en el refugio, Luna fue adoptada por una familia..."
  *               foto_actual_1:
  *                 type: string
+ *                 format: uri
  *               foto_actual_2:
  *                 type: string
+ *                 format: uri
  *               foto_actual_3:
  *                 type: string
+ *                 format: uri
  *               fecha_adopcion:
  *                 type: string
  *                 format: date
+ *                 example: "2024-01-15"
  *     responses:
  *       201:
- *         description: Caso de éxito creado
+ *         description: Caso de éxito creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
  *       400:
  *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/', verificarToken, createCasoExito);
 
@@ -121,18 +200,53 @@ router.post('/', verificarToken, createCasoExito);
  *                 type: string
  *               foto_actual_1:
  *                 type: string
+ *                 format: uri
  *               foto_actual_2:
  *                 type: string
+ *                 format: uri
  *               foto_actual_3:
  *                 type: string
+ *                 format: uri
  *               fecha_adopcion:
  *                 type: string
  *                 format: date
  *     responses:
  *       200:
- *         description: Caso de éxito actualizado
+ *         description: Caso de éxito actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: Caso no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.put('/:id', verificarToken, updateCasoExito);
 
@@ -153,11 +267,42 @@ router.put('/:id', verificarToken, updateCasoExito);
  *         description: ID del caso de éxito
  *     responses:
  *       200:
- *         description: Caso de éxito eliminado
+ *         description: Caso de éxito eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Caso de éxito eliminado correctamente
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Sin permisos para eliminar este caso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: Caso no encontrado
- *       403:
- *         description: Sin permisos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:id', verificarToken, deleteCasoExito);
 

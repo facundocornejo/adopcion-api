@@ -22,7 +22,7 @@ const { verificarToken } = require('../middlewares/auth.middleware');
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Estadísticas generales
+ *         description: Estadísticas generales del dashboard
  *         content:
  *           application/json:
  *             schema:
@@ -30,15 +30,51 @@ const { verificarToken } = require('../middlewares/auth.middleware');
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 data:
  *                   type: object
  *                   properties:
  *                     resumen:
  *                       type: object
+ *                       properties:
+ *                         total_animales:
+ *                           type: integer
+ *                         total_solicitudes:
+ *                           type: integer
+ *                         adopciones_completadas:
+ *                           type: integer
  *                     animales_por_estado:
  *                       type: object
+ *                       properties:
+ *                         Disponible:
+ *                           type: integer
+ *                         En proceso:
+ *                           type: integer
+ *                         Adoptado:
+ *                           type: integer
  *                     solicitudes_por_estado:
  *                       type: object
+ *                       properties:
+ *                         Nueva:
+ *                           type: integer
+ *                         Revisada:
+ *                           type: integer
+ *                         Aprobada:
+ *                           type: integer
+ *                         Rechazada:
+ *                           type: integer
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/stats', verificarToken, getDashboardStats);
 
