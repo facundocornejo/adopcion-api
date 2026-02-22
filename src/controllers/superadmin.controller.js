@@ -465,6 +465,129 @@ const createContactRequest = async (req, res) => {
   }
 };
 
+/**
+ * Resetear contraseña de un administrador
+ * PUT /api/super-admin/admins/:id/reset-password
+ */
+const resetAdminPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { new_password } = req.body;
+
+    if (!new_password) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'La nueva contraseña es requerida'
+        }
+      });
+    }
+
+    // Validar política de contraseñas
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&_\-#]{8,}$/;
+    if (!passwordRegex.test(new_password)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'WEAK_PASSWORD',
+          message: 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula y un número'
+        }
+      });
+    }
+
+    // Verificar que el admin existe
+    const admin = await prisma.administrador.findUnique({
+      where: { id: parseInt(id) },
+      include: { organizacion: true }
+    });
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Administrador no encontrado'
+        }
+      });
+    }
+
+    // Hash de la nueva contraseña
+    const password_hash = await bcrypt.hash(new_password, 10);
+
+    // Actualizar contraseña
+    await prisma.administrador.update({
+      where: { id: parseInt(id) },
+      data: { password_hash }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        message: `Contraseña reseteada correctamente para ${admin.username}`,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          email: admin.email,
+          organizacion: admin.organizacion.nombre
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en resetAdminPassword:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Error al resetear la contraseña'
+      }
+    });
+  }
+};
+
+/**
+ * Listar todos los administradores
+ * GET /api/super-admin/admins
+ */
+const getAdmins = async (req, res) => {
+  try {
+    const admins = await prisma.administrador.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        es_super_admin: true,
+        fecha_creacion: true,
+        ultimo_acceso: true,
+        organizacion: {
+          select: {
+            id: true,
+            nombre: true,
+            slug: true
+          }
+        }
+      },
+      orderBy: { fecha_creacion: 'desc' }
+    });
+
+    res.json({
+      success: true,
+      data: { admins }
+    });
+
+  } catch (error) {
+    console.error('Error en getAdmins:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Error al obtener administradores'
+      }
+    });
+  }
+};
+
 module.exports = {
   verificarSuperAdmin,
   getOrganizations,
@@ -473,5 +596,7 @@ module.exports = {
   deleteOrganization,
   getContactRequests,
   updateContactRequest,
-  createContactRequest
+  createContactRequest,
+  resetAdminPassword,
+  getAdmins
 };

@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/database');
+const { notificarSolicitudRecuperacion } = require('../services/email.service');
 
 // POST /api/auth/login
 const login = async (req, res) => {
@@ -171,4 +172,57 @@ const me = async (req, res) => {
   }
 };
 
-module.exports = { login, logout, me };
+// POST /api/auth/forgot-password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'El email es requerido'
+        }
+      });
+    }
+
+    // Buscar el admin por email con su organización
+    const admin = await prisma.administrador.findUnique({
+      where: { email },
+      include: { organizacion: true }
+    });
+
+    // Por seguridad, siempre responder igual (no revelar si el email existe)
+    if (!admin) {
+      return res.json({
+        success: true,
+        data: {
+          message: 'Si el email está registrado, los administradores recibirán tu solicitud'
+        }
+      });
+    }
+
+    // Enviar notificación a los super admins
+    await notificarSolicitudRecuperacion(admin);
+
+    res.json({
+      success: true,
+      data: {
+        message: 'Si el email está registrado, los administradores recibirán tu solicitud'
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en forgotPassword:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Error interno del servidor'
+      }
+    });
+  }
+};
+
+module.exports = { login, logout, me, forgotPassword };

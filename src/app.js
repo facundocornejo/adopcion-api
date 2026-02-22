@@ -130,11 +130,11 @@ app.use(cors({
   credentials: true
 }));
 
-// Parsear JSON en el body de las requests
-app.use(express.json());
+// Parsear JSON en el body de las requests (límite aumentado para uploads)
+app.use(express.json({ limit: '10mb' }));
 
-// Parsear datos de formularios URL-encoded
-app.use(express.urlencoded({ extended: true }));
+// Parsear datos de formularios URL-encoded (límite aumentado)
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ============================================
 // RUTAS

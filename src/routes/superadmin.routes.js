@@ -9,7 +9,9 @@ const {
   deleteOrganization,
   getContactRequests,
   updateContactRequest,
-  createContactRequest
+  createContactRequest,
+  resetAdminPassword,
+  getAdmins
 } = require('../controllers/superadmin.controller');
 
 // ============================================
@@ -499,5 +501,108 @@ router.get('/super-admin/contact-requests', verificarToken, verificarSuperAdmin,
  *               $ref: '#/components/schemas/Error'
  */
 router.put('/super-admin/contact-requests/:id', verificarToken, verificarSuperAdmin, updateContactRequest);
+
+/**
+ * @swagger
+ * /api/super-admin/admins:
+ *   get:
+ *     summary: Listar todos los administradores
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de todos los administradores
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     admins:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           username:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           es_super_admin:
+ *                             type: boolean
+ *                           organizacion:
+ *                             type: object
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ */
+router.get('/super-admin/admins', verificarToken, verificarSuperAdmin, getAdmins);
+
+/**
+ * @swagger
+ * /api/super-admin/admins/{id}/reset-password:
+ *   put:
+ *     summary: Resetear contraseña de un administrador
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del administrador
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - new_password
+ *             properties:
+ *               new_password:
+ *                 type: string
+ *                 format: password
+ *                 example: "NuevaPassword123"
+ *                 description: "Mínimo 8 caracteres, una mayúscula, una minúscula y un número"
+ *     responses:
+ *       200:
+ *         description: Contraseña reseteada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Contraseña reseteada correctamente para usuario1"
+ *                     admin:
+ *                       type: object
+ *       400:
+ *         description: Contraseña inválida o débil
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *       404:
+ *         description: Administrador no encontrado
+ */
+router.put('/super-admin/admins/:id/reset-password', verificarToken, verificarSuperAdmin, resetAdminPassword);
 
 module.exports = router;

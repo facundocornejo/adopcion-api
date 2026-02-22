@@ -124,7 +124,8 @@ const handleMulterError = (err, req, res, next) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/', verificarToken, upload.single('file'), handleMulterError, uploadImage);
+// Acepta campo 'image' o 'file' para compatibilidad
+router.post('/', verificarToken, upload.single('image'), handleMulterError, uploadImage);
 
 /**
  * @swagger

@@ -132,7 +132,78 @@ const verificarConfiguracionEmail = async () => {
   }
 };
 
+/**
+ * Enviar email de notificación cuando un admin solicita recuperar contraseña
+ * @param {Object} admin - Datos del administrador
+ */
+const notificarSolicitudRecuperacion = async (admin) => {
+  try {
+    const destinatario = process.env.ADMIN_EMAIL;
+
+    if (!destinatario) {
+      console.warn('No hay ADMIN_EMAIL configurado - No se enviará notificación');
+      return { success: false, reason: 'No ADMIN_EMAIL configured' };
+    }
+
+    const mailOptions = {
+      from: `"Adopción Responsable" <${process.env.SMTP_USER}>`,
+      to: destinatario,
+      subject: `Solicitud de recuperación de contraseña - ${admin.username}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4a5568; border-bottom: 2px solid #e53e3e; padding-bottom: 10px;">
+            Solicitud de Recuperación de Contraseña
+          </h2>
+
+          <div style="background: #fff5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #e53e3e;">
+            <p style="margin: 0; font-size: 16px;">
+              Un administrador ha solicitado recuperar su contraseña.
+            </p>
+          </div>
+
+          <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #2d3748; margin-top: 0;">Datos del Administrador</h3>
+            <p><strong>ID:</strong> #${escapeHtml(admin.id)}</p>
+            <p><strong>Usuario:</strong> ${escapeHtml(admin.username)}</p>
+            <p><strong>Email:</strong> <a href="mailto:${escapeHtml(admin.email)}">${escapeHtml(admin.email)}</a></p>
+            <p><strong>Organización:</strong> ${escapeHtml(admin.organizacion?.nombre || 'N/A')}</p>
+          </div>
+
+          <div style="background: #ebf8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #2d3748; margin-top: 0;">Acción Requerida</h3>
+            <p>Para resetear la contraseña de este usuario, ingresá al panel de super admin y usá la opción de "Resetear contraseña".</p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+
+          <p style="color: #718096; font-size: 14px;">
+            <strong>Fecha de solicitud:</strong> ${new Date().toLocaleString('es-AR', {
+              timeZone: 'America/Argentina/Buenos_Aires',
+              dateStyle: 'long',
+              timeStyle: 'short'
+            })}
+          </p>
+
+          <p style="color: #718096; font-size: 12px; margin-top: 30px;">
+            Este email fue enviado automáticamente desde la plataforma de adopción.
+          </p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Email de recuperación enviado a ${destinatario} para usuario ${admin.username}`);
+
+    return { success: true };
+
+  } catch (error) {
+    console.error('Error al enviar email de recuperación:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   notificarNuevaSolicitud,
+  notificarSolicitudRecuperacion,
   verificarConfiguracionEmail
 };

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login, logout, me } = require('../controllers/auth.controller');
+const { login, logout, me, forgotPassword } = require('../controllers/auth.controller');
 const { verificarToken } = require('../middlewares/auth.middleware');
 
 /**
@@ -164,5 +164,57 @@ router.post('/logout', verificarToken, logout);
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/me', verificarToken, me);
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Solicitar recuperación de contraseña
+ *     description: Envía una notificación a los administradores para que reseteen la contraseña manualmente
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "usuario@ejemplo.com"
+ *     responses:
+ *       200:
+ *         description: Solicitud procesada (siempre retorna éxito por seguridad)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Si el email está registrado, los administradores recibirán tu solicitud"
+ *       400:
+ *         description: Email no proporcionado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/forgot-password', forgotPassword);
 
 module.exports = router;
