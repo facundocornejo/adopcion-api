@@ -8,9 +8,23 @@ const getDashboardStats = async (req, res) => {
   try {
     const { es_super_admin, organizacion_id } = req.admin;
 
-    // Filtro base: superadmin ve todo, admin regular solo su organización
-    const animalWhere = es_super_admin ? {} : { organizacion_id };
-    const solicitudWhere = es_super_admin ? {} : { animal: { organizacion_id } };
+    // Filtro según tipo de usuario y query params
+    let animalWhere = {};
+    let solicitudWhere = {};
+
+    if (es_super_admin) {
+      // Super admin: puede filtrar por org específica o ver global
+      if (req.query.organizacion_id) {
+        const orgId = parseInt(req.query.organizacion_id);
+        animalWhere = { organizacion_id: orgId };
+        solicitudWhere = { animal: { organizacion_id: orgId } };
+      }
+      // Si no pasa organizacion_id, ve todo (where vacío = global)
+    } else {
+      // Admin normal: solo su organización
+      animalWhere = { organizacion_id };
+      solicitudWhere = { animal: { organizacion_id } };
+    }
 
     // Ejecutar todas las consultas en paralelo para mejor rendimiento
     const [

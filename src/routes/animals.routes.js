@@ -42,8 +42,14 @@ const optionalAuth = (req, res, next) => {
  *       Lista animales con filtros opcionales y paginación.
  *       - **Público**: Solo muestra animales Disponible, En proceso, En transito
  *       - **Admin autenticado**: Muestra todos los animales de su organización
+ *       - **Super Admin**: Muestra todos los animales de todas las organizaciones (o filtrar con organizacion_id)
  *     tags: [Animales]
  *     parameters:
+ *       - in: query
+ *         name: organizacion_id
+ *         schema:
+ *           type: integer
+ *         description: (Solo Super Admin) Filtrar por organización específica
  *       - in: query
  *         name: estado
  *         schema:

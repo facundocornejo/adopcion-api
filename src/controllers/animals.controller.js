@@ -17,9 +17,18 @@ const getAnimals = async (req, res) => {
     // Siempre excluir eliminados (soft delete)
     where.deleted_at = null;
 
-    // Si está autenticado, filtrar por su organización
+    // Filtrar según tipo de usuario
     if (req.admin) {
-      where.organizacion_id = req.admin.organizacion_id;
+      if (req.admin.es_super_admin) {
+        // Super admin: puede filtrar por org o ver todas
+        if (req.query.organizacion_id) {
+          where.organizacion_id = parseInt(req.query.organizacion_id);
+        }
+        // Si no pasa organizacion_id, no filtra (ve todas las orgs)
+      } else {
+        // Admin normal: solo su organización
+        where.organizacion_id = req.admin.organizacion_id;
+      }
     } else {
       // Si NO está autenticado (público), solo mostrar ciertos estados
       where.estado = { in: ['Disponible', 'En proceso', 'En transito'] };

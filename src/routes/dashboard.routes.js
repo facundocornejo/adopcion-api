@@ -17,9 +17,19 @@ const { verificarToken } = require('../middlewares/auth.middleware');
  * /api/dashboard/stats:
  *   get:
  *     summary: Estadísticas del dashboard
+ *     description: |
+ *       Obtiene estadísticas de animales y solicitudes.
+ *       - **Admin**: Ve estadísticas de su organización
+ *       - **Super Admin**: Ve estadísticas globales (o filtrar con organizacion_id)
  *     tags: [Dashboard]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: organizacion_id
+ *         schema:
+ *           type: integer
+ *         description: (Solo Super Admin) Filtrar estadísticas por organización específica
  *     responses:
  *       200:
  *         description: Estadísticas generales del dashboard
