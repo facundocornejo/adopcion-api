@@ -1,69 +1,87 @@
-[18:12, 24/2/2026] Guille Londero Tecnicatura Programación Paraná: Request URL
-
-https://adopcion-api.onrender.com/api/auth/forgot-passwordReferrer Policy
-
-strict-origin-when-cross-origin
-
-Response: Failed to Load response data
-
-No content available for preflight request
-
-2:"$Sreact.fragment"
-4:I["[project]/node_modules/next/dist/client/components/layout-router.js [app-client] (ecmascript)",["/next/static/chunks/node_modules_next_dist_be32b49c..js","/next/static/chunks/app_favicon_ico_mjs_745fddaf..js"],"default"]
-6:I["[project]/node_modules/next/dist/client/components/render-from-template-context.js [app-client] (ecmascript)",["/next/static/chunks/node_modules_next_dist_be32b49c..js","/next/static/chunks/app_favicon_ico_mjs_745fddaf..js"],"default"]
-9:I["[project]/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js [app-client] (ecmascript)",["/next/static/chunks/node_modules_next_dist_be32b49c..js","/next/static/chunks/app_favicon_ico_mjs_745fddaf..js"],"SegmentViewNode"]
-b:I["[project]/node_modules/next/dist/client/components/client-page.js [app-client] (ecmascript)",["/next/static/chunks/node_modules_next_dist_be32b49c..js","/next/static/chunks/app_favicon_ico_mjs_745fddaf..js"],"ClientPageRoot"]
-c:I["[project]/app/forgot-password/page.tsx [app-client] (ecmascript)",["/next/static/chunks/_f3bbaf6f..js","/next/static/chunks/app_layout_tsx_1cf6b850..js","/next/static/chunks/node_modules_next_a62874fb..js","/next/static/chunks/app_765dfc5e..js","/next/static/chunks/app_forgot-password_page_tsx_eca8a457..js"],"default"]
-13:I["[project]/node_modules/next/dist/lib/framework/boundary-components.js [app-client] (ecmascript)",["/next/static/chunks/node_modules_next_dist_be32b49c..js","/next/static/chunks/app_favicon_ico_mjs_745fddaf..js"],"OutletBoundary"]
-15:"$Sreact.suspense"
-1e:I["[project]/node_modules/next/dist/lib/framework/boundary-components.js [app-client] (ecmascript)",["/next/static/chunks/node_modules_next_dist_be32b49c..js","/next/static/chunks/app_favicon_ico_mjs_745fddaf..js"],"ViewportBoundary"]
-25:I["[project]/node_modules/next/dist/lib/framework/boundary-components.js [app-client] (ecmascript)",["/next/static/chunks/node_modules_next_dist_be32b49c..js","/next/static/chunks/app_favicon_ico_mjs_745fddaf..js"],"MetadataBoundary"]
-:N1771967101634.8555
-1:[]
-3:[["Function.all","",0,0,0,0,true]]
-5:[["Function.all","",0,0,0,0,true]]
-7:[["Function.all","",0,0,0,0,true]]
-8:[["Function.all","",0,0,0,0,true]]
-a:[["Function.all","",0,0,0,0,true]]
-d:[["Array.map","",0,0,0,0,false],["Array.map","",0,0,0,0,false]]
-e:[["Array.map","",0,0,0,0,false],["Array.map","",0,0,0,0,false]]
-f:[["Array.map","",0,0,0,0,false],["Array.map","",0,0,0,0,false]]
-11:{"name":"Next.MetadataOutlet","key":null,"env":"Server","stack":[["Function.all","",0,0,0,0,true]],"props":{}}
-12:[]
-14:[]
-17:[]
-1a:"$EObject.defineProperty(function(type,config,children){for(var propName,i=2;i<arguments.length;i++)validateChildKeys(arguments[i]);i={};var key=null;if(null!=config)for(propName in didWarnAboutOldJSXRuntime||!(\"__self\"in config)||\"key\"in config||(didWarnAboutOldJSXRuntime=!0,console.warn(\"Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform\")),hasValidKey(config)&&(checkKeyStringCoercion(config.key),key=\"\"+config.key),config)hasOwnProperty.call(config,propName)&&\"key\"!==propName&&\"__self\"!==propName&&\"__source\"!==propName&&(i[propName]=config[propName]);var childrenLength=arguments.length-2;if(1===childrenLength)i.children=children;else if(1<childrenLength){for(var childArray=Array(childrenLength),_i=0;_i<childrenLength;_i++)childArray[_i]=arguments[_i+2];Object.freeze&&Object.freeze(childArray),i.children=childArray}if(type&&type.defaultProps)for(propName in childrenLength=type.defaultProps)void 0===i[propName…
-[18:13, 24/2/2026] Guille Londero Tecnicatura Programación Paraná: Guillermo, los datos de la consola confirman que el frontend está cargando el archivo físico (app/forgot-password/page.tsx), pero la petición de red se queda trabada en el preflight (OPTIONS) antes de siquiera intentar el POST. El mensaje "No content available for preflight request" indica que el navegador pregunta: "¿Puedo enviarte datos?" y el servidor de Render tarda tanto en responder que la conexión se muere.
-
-
-[1:32, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: MIGO IMPLEMENTE LO DEL CAMBIO DE CONTRASEÑA EN SUPERADMIN Y ME EL MISMO ERROR QUE HOY EN EL forgot-password
-[1:33, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: LA PRIMERA VEZ QUE CAMBIE CONTRASEÑA DE UNA ORGANIZACION ME FUNCIONO
-[1:34, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: CAMBIE UN POCO EL CODIGO PORQUE ME APARECIA UN ALERT HORRIBLE Y ME EMPEZO A APARCER ESTE ERROR, ES CM QUE DEMORA ENCARGAR Y SE BLOQUEA
-[1:35, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: NO SE SI TENDRA Q VER MI INTERNET
-[1:35, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: O ES ALGO DE RENDER
-[1:35, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: LO RARO, ES Q AL IGUAL QUE PASABA HOY
-[1:36, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: LO DEMAS SI FUCNIONA BIEN
-[1:37, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: Request URL
+Request URL
 https://adopcion-api.onrender.com/api/super-admin/organizations
 Request Method
 OPTIONS
 Status Code
 204 No Content
 Remote Address
-216.24.57.7:443
+216.24.57.251:443
+Referrer Policy
+strict-origin-when-cross-orig    ReqHeaders general
+Headers general
+Request URL
+https://adopcion-api.onrender.com/api/super-admin/organizations
+Request Method
+OPTIONS
+Status Code
+204 No Content
+Remote Address
+216.24.57.251:443
 Referrer Policy
 strict-origin-when-cross-origin
+
+Response Headers
 access-control-allow-credentials
 true
 access-control-allow-headers
-authorization,content-type
+Content-Type,Authorization,X-Requested-With
 access-control-allow-methods
-GET,HEAD,PUT,PATCH,POST,DELETE
+GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS
 access-control-allow-origin
 http://localhost:3000
-[1:37, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: LO RARO, ES Q AL IGUAL QUE PASABA HOY
-PASA CON LO DE CONTRASEÑA NOMS EH, LAS DOS COSAS Q QUISE IMPLEMENTAR
-[1:37, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: REFERIDAS A CONTRASEÑA
-[1:38, 25/2/2026] Guille Londero Tecnicatura Programación Paraná: NO ANDUVIERON!
-         
-Como bien dijiste, no tiene sentido que solo falle esta función si el resto del Dashboard vuela. El problema es que esta ruta es pública y probablemente no está pasando por el mismo middleware de CORS que las rutas autenticadas.                estoo me pasa el que le dice su IA.. 
+alt-svc
+h3=":443"; ma=86400
+cf-cache-status
+DYNAMIC
+cf-ray
+9d34b91a2ae49b12-EZE
+date
+Wed, 25 Feb 2026 05:15:07 GMT
+priority
+u=1,i
+rndr-id
+e273e210-ad27-412e
+server
+cloudflare
+server-timing
+cfExtPri
+vary
+Origin
+x-powered-by
+Express
+x-render-origin-server
+Render
+
+Request header
+:authority
+adopcion-api.onrender.com
+:method
+OPTIONS
+:path
+/api/super-admin/organizations
+:scheme
+https
+accept
+/
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+en-US,en;q=0.9
+access-control-request-headers
+authorization,content-type
+access-control-request-method
+GET
+origin
+http://localhost:3000
+priority
+u=1, i
+referer
+http://localhost:3000/
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+cross-site
+user-agent
+Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1

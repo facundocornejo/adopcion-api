@@ -1,4 +1,10 @@
-const transporter = require('../config/email');
+const { Resend } = require('resend');
+
+// Inicializar Resend con la API key
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Email remitente (usar onboarding@resend.dev hasta verificar dominio propio)
+const FROM_EMAIL = 'Adopción Responsable <onboarding@resend.dev>';
 
 /**
  * Escapar caracteres HTML para prevenir inyección
@@ -34,10 +40,8 @@ const notificarNuevaSolicitud = async (solicitud, animal, organizacion = null) =
       return { success: false, reason: 'No destination email configured' };
     }
 
-    const nombreOrg = organizacion?.nombre || 'Administrador';
-
-    const mailOptions = {
-      from: `"Adopción Responsable" <${process.env.SMTP_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
       to: destinatario,
       subject: `Nueva solicitud de adopción para ${animal.nombre}`,
       html: `
@@ -105,12 +109,15 @@ const notificarNuevaSolicitud = async (solicitud, animal, organizacion = null) =
           </p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('Error al enviar email de notificación:', error);
+      return { success: false, error: error.message };
+    }
+
     console.log(`Email de notificación enviado a ${destinatario} para solicitud #${solicitud.id}`);
-
-    return { success: true };
+    return { success: true, id: data?.id };
 
   } catch (error) {
     console.error('Error al enviar email de notificación:', error);
@@ -122,14 +129,12 @@ const notificarNuevaSolicitud = async (solicitud, animal, organizacion = null) =
  * Verificar que la configuración de email esté correcta
  */
 const verificarConfiguracionEmail = async () => {
-  try {
-    await transporter.verify();
-    console.log('Configuración de email verificada correctamente');
-    return { success: true };
-  } catch (error) {
-    console.error('Error en configuración de email:', error);
-    return { success: false, error: error.message };
+  if (!process.env.RESEND_API_KEY) {
+    console.error('RESEND_API_KEY no está configurada');
+    return { success: false, error: 'RESEND_API_KEY not configured' };
   }
+  console.log('Configuración de Resend verificada correctamente');
+  return { success: true };
 };
 
 /**
@@ -145,8 +150,8 @@ const notificarSolicitudRecuperacion = async (admin) => {
       return { success: false, reason: 'No ADMIN_EMAIL configured' };
     }
 
-    const mailOptions = {
-      from: `"Adopción Responsable" <${process.env.SMTP_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
       to: destinatario,
       subject: `Solicitud de recuperación de contraseña - ${admin.username}`,
       html: `
@@ -189,12 +194,15 @@ const notificarSolicitudRecuperacion = async (admin) => {
           </p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('Error al enviar email de recuperación:', error);
+      return { success: false, error: error.message };
+    }
+
     console.log(`Email de recuperación enviado a ${destinatario} para usuario ${admin.username}`);
-
-    return { success: true };
+    return { success: true, id: data?.id };
 
   } catch (error) {
     console.error('Error al enviar email de recuperación:', error);

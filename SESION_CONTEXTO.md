@@ -20,7 +20,83 @@
 
 ---
 
-## Lo que hicimos en la última sesión (22 Feb 2026)
+## Lo que hicimos en la última sesión (25 Feb 2026 - Tarde)
+
+### 1. Nuevo Endpoint: Actualizar Organización
+
+**Problema reportado:** El frontend intentaba hacer `PUT /api/super-admin/organizations/6` pero la ruta no existía (404).
+
+**Solución:** Creamos el endpoint completo para editar organizaciones desde Super Admin.
+
+**Endpoint:** `PUT /api/super-admin/organizations/:id`
+
+**Campos que acepta:**
+- Datos org: `nombre`, `email`, `telefono`, `whatsapp`, `direccion`, `descripcion`, `instagram`, `facebook`, `donacion_alias`, `donacion_cbu`, `donacion_info`
+- Datos admin principal: `admin_username`, `admin_email`, `admin_password`
+
+**Comportamiento:**
+- Si se envía `nombre`, actualiza también el `slug` automáticamente
+- Si se envía `admin_password`, valida política (8+ chars, mayúscula, minúscula, número) y actualiza
+- Campos vacíos o no enviados no se modifican
+
+**Archivos modificados:**
+- `src/controllers/superadmin.controller.js` - Nueva función `updateOrganization`
+- `src/routes/superadmin.routes.js` - Nueva ruta + documentación Swagger
+
+**Commits:**
+- `82b173b` - feat: Agregar endpoint PUT para actualizar organizaciones
+- `16f568b` - feat: Permitir actualizar contraseña del admin en PUT organizations
+
+### 2. Resumen de Endpoints de Contraseña
+
+| Endpoint | ¿Quién lo usa? | ¿Qué hace? |
+|----------|----------------|------------|
+| `POST /api/auth/forgot-password` | Usuario público | Envía email a super admins pidiendo reseteo |
+| `PUT /api/super-admin/admins/:id/reset-password` | Super Admin | Resetea contraseña de cualquier admin por ID (`new_password`) |
+| `PUT /api/super-admin/organizations/:id` | Super Admin | Edita org + opcionalmente contraseña del admin principal (`admin_password`) |
+
+---
+
+## Lo que hicimos en sesión anterior (25 Feb 2026 - Mañana)
+
+### 1. Fix CORS Preflight Timeout
+
+**Problema reportado:** Los endpoints de contraseña (`/api/auth/forgot-password` y `/api/super-admin/admins/:id/reset-password`) se "colgaban" - el preflight OPTIONS no respondía a tiempo.
+
+**Causa:** El preflight pasaba por toda la cadena de middlewares (rate limiter, etc.) lo que causaba delays.
+
+**Solución aplicada en `src/app.js`:**
+- Movimos la configuración de CORS al inicio de los middlewares
+- Agregamos `app.options('*', cors(corsOptions))` para responder inmediatamente a preflight
+- Excluimos requests OPTIONS del rate limiter general
+- Agregamos configuración explícita de métodos y headers permitidos
+
+**Commits:**
+- `e8aae86` - fix: Mejorar manejo de CORS preflight para evitar timeouts
+- `6f00c5a` - fix: Enviar email de recuperación en background sin bloquear respuesta
+
+### 2. Fix Email Bloqueando Respuesta
+
+**Problema:** El endpoint `forgotPassword` usaba `await` para enviar email, bloqueando la respuesta HTTP si el SMTP tardaba.
+
+**Solución en `src/controllers/auth.controller.js`:**
+```javascript
+// Antes (bloqueaba):
+await notificarSolicitudRecuperacion(admin);
+
+// Después (no bloquea):
+notificarSolicitudRecuperacion(admin).catch(err => {
+  console.error('Error enviando email de recuperación (background):', err);
+});
+```
+
+### 3. Nota sobre el incidente
+
+El compañero reportó que "se colgaba" al apretar el botón, pero después se descubrió que **el botón del frontend no estaba mandando ningún request**. Los fixes del backend igual son válidos y mejoran el rendimiento.
+
+---
+
+## Lo que hicimos en sesión anterior (22 Feb 2026)
 
 ### 1. Creamos usuario administrador para compañero
 - **Usuario:** `companero`
@@ -228,4 +304,4 @@ reset('EMAIL_AQUI', 'NUEVA_PASSWORD');
 
 ---
 
-*Última actualización: 22 Feb 2026*
+*Última actualización: 25 Feb 2026 - Tarde*
