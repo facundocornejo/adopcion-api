@@ -145,10 +145,16 @@ Authorization: Bearer <token>
             fecha_publicacion: { type: 'string', format: 'date-time' },
             organizacion: {
               type: 'object',
+              description: 'Datos públicos de la organización (sin teléfono/whatsapp por privacidad)',
               properties: {
                 id: { type: 'integer' },
                 nombre: { type: 'string' },
-                slug: { type: 'string' }
+                slug: { type: 'string' },
+                instagram: { type: 'string', example: '@patitas_felices', nullable: true },
+                facebook: { type: 'string', example: 'patitasfelices', nullable: true },
+                donacion_alias: { type: 'string', example: 'PATITAS.FELICES', nullable: true },
+                donacion_cbu: { type: 'string', nullable: true },
+                donacion_info: { type: 'string', example: 'También aceptamos alimento balanceado', nullable: true }
               }
             }
           }
