@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-02-16T07:23:05.481Z",
+  "target": "http://localhost:3000/api",
+  "summary": {
+    "passed": 5,
+    "failed": 3,
+    "total": 8,
+    "successRate": "62.5%"
+  },
+  "tests": [
+    {
+      "name": "Token expirado/inválido es rechazado",
+      "category": "A07",
+      "passed": true,
+      "details": "Status: 401",
+      "timestamp": "2026-02-16T07:22:51.505Z"
+    },
+    {
+      "name": "Token con firma alterada es rechazado",
+      "category": "A07",
+      "passed": false,
+      "details": "Status: 404",
+      "timestamp": "2026-02-16T07:22:51.507Z"
+    },
+    {
+      "name": "Token vacío es rechazado",
+      "category": "A07",
+      "passed": true,
+      "details": "Status: 401",
+      "timestamp": "2026-02-16T07:22:51.509Z"
+    },
+    {
+      "name": "Authorization header con formato incorrecto es rechazado",
+      "category": "A07",
+      "passed": true,
+      "details": "Status: 401",
+      "timestamp": "2026-02-16T07:22:51.511Z"
+    },
+    {
+      "name": "Login con contraseña incorrecta es rechazado",
+      "category": "A07",
+      "passed": false,
+      "details": "Status: 500",
+      "timestamp": "2026-02-16T07:22:53.821Z"
+    },
+    {
+      "name": "Login con email inexistente es rechazado",
+      "category": "A07",
+      "passed": false,
+      "details": "Status: 500",
+      "timestamp": "2026-02-16T07:22:56.140Z"
+    },
+    {
+      "name": "Mensajes de error de login no revelan existencia de usuario",
+      "category": "A07",
+      "passed": true,
+      "details": "Msg1: \"Error interno del servidor\", Msg2: \"Error interno del servidor\"",
+      "timestamp": "2026-02-16T07:22:56.140Z"
+    },
+    {
+      "name": "Rate limiting activo en login (bloqueado después de 2 intentos)",
+      "category": "RATE_LIMIT",
+      "passed": true,
+      "details": "Bloqueado en intento 2",
+      "timestamp": "2026-02-16T07:23:00.835Z"
+    }
+  ]
+}

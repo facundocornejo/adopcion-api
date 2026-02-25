@@ -29,7 +29,27 @@
       "Bash(git commit:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(npm run test:security:*)",
+      "Bash(git restore:*)",
+      "Bash(cat:*)",
+      "Bash(node -e:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJodWVsbGFzLmFkbWluQGVqZW1wbG8uY29tIiwidXNlcm5hbWUiOiJodWVsbGFzX2FkbWluIiwib3JnYW5pemFjaW9uX2lkIjozLCJlc19zdXBlcl9hZG1pbiI6ZmFsc2UsImlhdCI6MTc3MTI3MDUzNywiZXhwIjoxNzcxMzU2OTM3fQ.NNIqt9taQxpa07jVG0Uq1vZyjeMajSDN_q36Dls2AZ0\")",
+      "Bash(__NEW_LINE__ echo \"=== 2. CREAR ANIMAL ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 3. CAMBIAR ESTADO ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 4. ELIMINAR \\(SOFT DELETE\\) ===\")",
+      "Bash(__NEW_LINE__ echo \"\")",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(grep:*)",
+      "Bash(xargs:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:adopcion-api.onrender.com)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJwcm95ZWN0b3BlcnJpdG9zQGhvdG1haWwuY29tIiwidXNlcm5hbWUiOiJhZG1pbiIsIm9yZ2FuaXphY2lvbl9pZCI6MSwiZXNfc3VwZXJfYWRtaW4iOnRydWUsImlhdCI6MTc3MTc3NzA3MSwiZXhwIjoxNzcxODYzNDcxfQ.fmQUllfrnndTA2ZZxQvEMiVNQ4JHxNBOQx1Wwjrw3wI\")",
+      "Bash(__NEW_LINE__ echo \"=== 2. LISTAR ADMINS \\(Super Admin\\) ===\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJwcm95ZWN0b3BlcnJpdG9zQGhvdG1haWwuY29tIiwidXNlcm5hbWUiOiJhZG1pbiIsIm9yZ2FuaXphY2lvbl9pZCI6MSwiZXNfc3VwZXJfYWRtaW4iOnRydWUsImlhdCI6MTc3MTc4NTk0OCwiZXhwIjoxNzcxODcyMzQ4fQ.XNp18S0omclNiw-8j6hmjNjXdCRXgGb8k0FbGc-F6qU\")",
+      "Bash(__NEW_LINE__ echo \"=== 2. ANIMALES SIN FILTRO \\(Super Admin ve TODOS\\) ===\")",
+      "Bash(python:*)"
     ]
   }
 }

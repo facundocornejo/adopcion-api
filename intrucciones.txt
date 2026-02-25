@@ -1,0 +1,174 @@
+Necesito que analices TODO el código de este proyecto y me generes DOS archivos Markdown de documentación. Leé cada archivo, cada ruta, cada modelo, cada middleware, cada controlador, cada servicio — todo. No asumas nada, basate únicamente en lo que ves en el código.
+
+## Contexto del proyecto
+
+Este es el backend de una plataforma web de adopción animal desarrollada como Trabajo Final Integrador (TFI) para la Tecnicatura Universitaria en Programación de la UTN.
+
+**Stack técnico:**
+- Runtime: Node.js
+- Framework: Express.js
+- ORM: Prisma
+- Base de datos: PostgreSQL (Supabase en producción)
+- Autenticación: JWT (jsonwebtoken)
+- Validación: express-validator
+- Documentación API: Swagger (swagger-jsdoc + swagger-ui-express)
+- Almacenamiento de imágenes: Cloudinary
+- Emails: Nodemailer
+- Hosting API: Render
+
+---
+
+## ARCHIVO 1: `DOCUMENTACION_PERSONAL.md` — Para mí (Facundo)
+
+Este archivo es para que yo entienda el sistema que construí con ayuda de IA. Soy un programador junior que todavía está aprendiendo, así que necesito que seas **pedagógico, claro y detallado**. Escribilo en español.
+
+### Estructura que debe tener:
+
+#### 1. Visión general del sistema
+- ¿Qué hace esta API? Explicalo como si se lo contaras a alguien que no sabe programar.
+- ¿Cuál es el flujo principal? (un rescatista publica un animal → un adoptante lo ve → solicita adopción → el rescatista evalúa → se aprueba/rechaza)
+- Diagrama de flujo general en texto (usando flechas → y descripciones).
+
+#### 2. Arquitectura y estructura de carpetas
+- Explicá qué hay en CADA carpeta y archivo relevante.
+- ¿Por qué está organizado así? ¿Qué patrón de arquitectura sigue? (MVC, capas, etc.)
+- Para cada carpeta, explicá su responsabilidad con ejemplos concretos del código.
+
+#### 3. Modelos de datos (Prisma)
+- Explicá CADA modelo del schema.prisma.
+- ¿Qué representa cada uno en el mundo real?
+- ¿Cómo se relacionan entre sí? (describí las relaciones: uno a muchos, muchos a muchos, etc.)
+- Para cada campo importante, explicá por qué existe y qué tipo de dato usa.
+- Incluí un diagrama de relaciones en texto (Entidad → relación → Entidad).
+
+#### 4. Rutas y endpoints
+- Listá TODAS las rutas agrupadas por recurso.
+- Para cada ruta explicá:
+  - Método HTTP y path
+  - ¿Qué hace en lenguaje simple?
+  - ¿Qué middlewares usa y por qué?
+  - ¿Qué recibe (body/params/query) y qué devuelve?
+  - ¿Requiere autenticación? ¿Qué rol?
+
+#### 5. Middlewares
+- Explicá CADA middleware que encuentres.
+- ¿Qué problema resuelve?
+- ¿En qué rutas se usa?
+- ¿Cómo funciona internamente? (explicá el código paso a paso si es necesario)
+
+#### 6. Autenticación y autorización
+- ¿Cómo funciona el sistema de JWT paso a paso?
+- ¿Qué pasa cuando un usuario se registra? ¿Y cuando hace login?
+- ¿Cómo se protegen las rutas?
+- ¿Qué roles existen y qué puede hacer cada uno?
+- Si hay refresh tokens, explicá el flujo completo.
+
+#### 7. Servicios externos
+- Cloudinary: ¿Cómo se suben las imágenes? ¿Dónde se configura? ¿Cómo se eliminan?
+- Nodemailer: ¿Qué emails se envían? ¿Cuándo se disparan? ¿Cómo están configurados?
+- Supabase: ¿Cómo se conecta? ¿Solo se usa como PostgreSQL o se usan más features?
+
+#### 8. Validaciones
+- ¿Qué validaciones tiene cada endpoint?
+- ¿Cómo funciona express-validator en este proyecto?
+- Mostrá ejemplos concretos del código y explicá qué valida cada regla.
+
+#### 9. Manejo de errores
+- ¿Cómo se manejan los errores en el proyecto?
+- ¿Hay un middleware global de errores?
+- ¿Qué formato tienen las respuestas de error?
+
+#### 10. Variables de entorno
+- Listá TODAS las variables de entorno que necesita el proyecto.
+- Explicá qué hace cada una y dónde conseguir los valores.
+- ¿Cuáles son obligatorias y cuáles opcionales?
+
+#### 11. Decisiones de diseño
+- Para cada decisión arquitectónica importante que identifiques en el código, explicá:
+  - ¿Qué se decidió?
+  - ¿Por qué es una buena práctica?
+  - ¿Qué alternativas existían?
+  - Esto es MUY importante para mí porque muchas decisiones las tomó la IA y necesito entenderlas.
+
+#### 12. Glosario técnico
+- Definí en lenguaje simple todos los términos técnicos que uses en el documento.
+- Ejemplos: ORM, middleware, JWT, seed, migración, endpoint, payload, etc.
+
+### Tono y estilo:
+- Hablame de vos (español argentino informal).
+- Explicá como si fueras un tutor paciente.
+- Cuando menciones código, mostrá el fragmento relevante y explicá línea por línea si es complejo.
+- Usá analogías cuando algo sea abstracto.
+- Si algo está mal implementado o podría mejorarse, decímelo con honestidad pero sin ser condescendiente.
+
+---
+
+## ARCHIVO 2: `DOCUMENTACION_COMPAÑERO.md` — Para mi compañero Guillermo
+
+Este archivo es para Guillermo, mi compañero del TFI. Él va a desarrollar el frontend que se conecta a esta API. Necesita saber TODO lo que necesita para trabajar sin tener que preguntarme cada 5 minutos. Escribilo en español.
+
+### Estructura que debe tener:
+
+#### 1. Resumen del proyecto
+- Qué es la plataforma, qué problema resuelve, brevemente.
+
+#### 2. Stack del backend
+- Qué tecnologías se usaron y por qué (breve, no necesita la explicación pedagógica).
+
+#### 3. Cómo levantar el proyecto en local
+- Paso a paso detallado: clonar repo, instalar dependencias, configurar .env, migrar BD, seedear datos de prueba, levantar el servidor.
+- Comandos exactos.
+- Qué versión de Node necesita.
+- Cómo conectarse a la BD local vs la de Supabase.
+
+#### 4. Modelo de datos
+- Diagrama o descripción clara de TODAS las entidades y sus relaciones.
+- Qué campos tiene cada entidad (nombre, tipo, si es obligatorio, si es único).
+- Esto es clave para que Guillermo sepa qué datos va a manejar en el front.
+
+#### 5. Contrato de API completo
+- TODOS los endpoints organizados por recurso.
+- Para cada endpoint:
+  - Método + URL
+  - Headers requeridos (especialmente Authorization)
+  - Body esperado (con ejemplo JSON)
+  - Respuesta exitosa (con ejemplo JSON)
+  - Posibles errores (con código HTTP y ejemplo)
+  - Si requiere autenticación y qué rol
+
+#### 6. Autenticación — Guía para el frontend
+- Flujo completo de registro e inicio de sesión.
+- Cómo guardar y enviar el token JWT.
+- Cómo manejar la expiración del token.
+- Si hay refresh token, cómo implementar el flujo de renovación.
+- Qué roles existen y cómo condicionan la UI.
+
+#### 7. Subida de imágenes
+- ¿Cómo se suben las imágenes desde el front?
+- ¿Se envían como multipart/form-data o como base64?
+- ¿Qué formatos y tamaños acepta?
+- ¿Cómo se obtienen las URLs de las imágenes ya subidas?
+
+#### 8. Paginación, filtros y búsqueda
+- Si la API tiene paginación, explicar cómo usarla (query params, formato de respuesta).
+- Qué filtros están disponibles en cada endpoint que los tenga.
+- Cómo funciona la búsqueda si existe.
+
+#### 9. Manejo de errores desde el front
+- Formato estándar de las respuestas de error.
+- Códigos HTTP que usa la API y qué significan en este contexto.
+- Recomendaciones para manejar errores en el frontend.
+
+#### 10. Documentación Swagger
+- URL de la documentación Swagger en producción.
+- Cómo usarla para probar endpoints.
+
+#### 11. Notas importantes
+- Cualquier cosa rara, limitación, o "truco" que el frontend necesite saber.
+- Cosas que podrían no ser obvias viendo solo la documentación.
+
+### Tono y estilo:
+- Profesional pero accesible, como documentación técnica de un proyecto real.
+- Directo al grano, sin explicaciones pedagógicas innecesarias.
+- Muchos ejemplos JSON de request/response.
+- Si hay algo que debería decidirse entre los dos (front y back), marcalo como "📌 DECISIÓN PENDIENTE".

@@ -36,6 +36,45 @@ app.set('trust proxy', 1);
 // MIDDLEWARES GLOBALES
 // ============================================
 
+// ============================================
+// CORS - Respuesta rápida a preflight OPTIONS
+// ============================================
+// Esto debe ir ANTES de cualquier otro middleware para evitar timeouts
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://adopcion-responsable.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (como mobile apps o curl)
+    if (!origin) return callback(null, true);
+
+    // Permitir cualquier subdominio de vercel.app que contenga "adopcion-responsable"
+    if (origin.includes('adopcion-responsable') && origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 204 // Algunos navegadores legacy necesitan esto
+};
+
+// Aplicar CORS a todas las rutas
+app.use(cors(corsOptions));
+
+// Responder inmediatamente a preflight OPTIONS (evita timeouts en Render)
+app.options('*', cors(corsOptions));
+
 // Helmet - Headers de seguridad
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }, // Permitir imágenes de Cloudinary
@@ -100,35 +139,13 @@ const contactRequestLimiter = rateLimit({
   legacyHeaders: false
 });
 
-// Aplicar rate limiting general
-app.use('/api', generalLimiter);
-
-// Habilitar CORS para permitir requests del frontend
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://adopcion-responsable.vercel.app',
-  process.env.FRONTEND_URL
-].filter(Boolean);
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (como mobile apps o curl)
-    if (!origin) return callback(null, true);
-
-    // Permitir cualquier subdominio de vercel.app que contenga "adopcion-responsable"
-    if (origin.includes('adopcion-responsable') && origin.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
-    }
-  },
-  credentials: true
-}));
+// Aplicar rate limiting general (excluye OPTIONS para no bloquear preflight)
+app.use('/api', (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return next(); // Skip rate limit para preflight
+  }
+  generalLimiter(req, res, next);
+});
 
 // Parsear JSON en el body de las requests (límite aumentado para uploads)
 app.use(express.json({ limit: '10mb' }));
