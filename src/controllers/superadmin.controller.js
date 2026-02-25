@@ -222,7 +222,8 @@ const updateOrganization = async (req, res) => {
       donacion_cbu,
       donacion_info,
       admin_username,
-      admin_email
+      admin_email,
+      admin_password
     } = req.body;
 
     const orgId = parseInt(id);
@@ -294,7 +295,7 @@ const updateOrganization = async (req, res) => {
       });
 
       // Actualizar admin principal si se envían datos
-      if ((admin_username || admin_email) && organizacion.administradores.length > 0) {
+      if ((admin_username || admin_email || admin_password) && organizacion.administradores.length > 0) {
         const adminId = organizacion.administradores[0].id;
 
         // Verificar duplicados si se cambia username o email
@@ -314,12 +315,24 @@ const updateOrganization = async (req, res) => {
           }
         }
 
+        // Preparar datos de actualización del admin
+        const adminUpdateData = {
+          username: admin_username || undefined,
+          email: admin_email || undefined
+        };
+
+        // Si se envía contraseña, validar y hashear
+        if (admin_password) {
+          const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&_\-#]{8,}$/;
+          if (!passwordRegex.test(admin_password)) {
+            throw new Error('WEAK_PASSWORD');
+          }
+          adminUpdateData.password_hash = await bcrypt.hash(admin_password, 10);
+        }
+
         await tx.administrador.update({
           where: { id: adminId },
-          data: {
-            username: admin_username || undefined,
-            email: admin_email || undefined
-          }
+          data: adminUpdateData
         });
       }
 
@@ -343,6 +356,16 @@ const updateOrganization = async (req, res) => {
         error: {
           code: 'DUPLICATE_ERROR',
           message: 'El username o email del admin ya está en uso'
+        }
+      });
+    }
+
+    if (error.message === 'WEAK_PASSWORD') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'WEAK_PASSWORD',
+          message: 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula y un número'
         }
       });
     }

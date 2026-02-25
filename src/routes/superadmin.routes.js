@@ -298,6 +298,10 @@ router.post('/super-admin/organizations', verificarToken, verificarSuperAdmin, c
  *                 type: string
  *                 format: email
  *                 description: "Actualiza email del admin principal"
+ *               admin_password:
+ *                 type: string
+ *                 format: password
+ *                 description: "Nueva contraseña del admin (mín 8 chars, mayúscula, minúscula, número)"
  *     responses:
  *       200:
  *         description: Organización actualizada exitosamente
