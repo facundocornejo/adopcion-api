@@ -20,7 +20,59 @@
 
 ---
 
-## Lo que hicimos en la última sesión (25 Feb 2026 - Noche)
+## Lo que hicimos en la última sesión (25 Feb 2026 - Noche continuación)
+
+### 1. Endpoint Animal con Datos de Donación y Redes Sociales
+
+**Requerimiento:** Al mostrar un animal, incluir datos de donación y redes sociales de la organización para que el frontend pueda mostrar todo junto.
+
+**Endpoint modificado:** `GET /api/animals/:id`
+
+**Campos agregados en `organizacion`:**
+- `instagram` - Red social
+- `facebook` - Red social
+- `donacion_alias` - Alias de Mercado Pago
+- `donacion_cbu` - CBU/CVU para transferencias
+- `donacion_info` - Texto libre con info adicional
+
+**Campo removido:** `whatsapp` (por privacidad, no se expone públicamente)
+
+**Archivos modificados:**
+- `src/controllers/animals.controller.js` - Agregados campos en el select
+- `src/config/swagger.js` - Documentación actualizada
+
+**Documentación para frontend:** `DOCS_ANIMAL_DONACIONES.md`
+
+**Commits:**
+- `2275860` - feat: Agregar datos de donación y redes sociales en GET /api/animals/:id
+- `74c1a82` - docs: Actualizar Swagger con campos de donación y redes en Animal
+- `5d9778d` - docs: Agregar documentación de campos de donación para frontend
+
+---
+
+### 2. Limpieza de Base de Datos para Testing
+
+**Objetivo:** Limpiar la BD para empezar a testear desde cero, manteniendo solo los super admins principales.
+
+**Eliminado:**
+- 19 animales
+- 5 solicitudes de adopción
+- 7 casos de éxito
+- 1 solicitud de contacto
+- 4 administradores (todos excepto facu y guille)
+- 3 organizaciones
+
+**Mantenido:**
+| Usuario | Email | Super Admin | Organización |
+|---------|-------|-------------|--------------|
+| facu | facundocornejodediego@hotmail.com | ✅ | refugio india (id: 4) |
+| guille | guillelondero@gmail.com | ✅ | Organización Huellas de Amore (id: 1) |
+
+**Organizaciones ocultas:** Las organizaciones de facu y guille fueron marcadas como `activa: false` para que no aparezcan en listados públicos pero sigan existiendo para el funcionamiento del super admin.
+
+---
+
+## Lo que hicimos antes en esta sesión (25 Feb 2026 - Noche)
 
 ### 1. Migración del Sistema de Emails: Nodemailer → Resend
 
@@ -373,4 +425,4 @@ reset('EMAIL_AQUI', 'NUEVA_PASSWORD');
 
 ---
 
-*Última actualización: 25 Feb 2026 - Noche*
+*Última actualización: 25 Feb 2026 - Noche (continuación)*
