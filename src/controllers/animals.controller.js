@@ -120,10 +120,10 @@ const getAnimalById = async (req, res) => {
             id: true,
             nombre: true,
             slug: true,
-            whatsapp: true,
             instagram: true,
             facebook: true,
             donacion_alias: true,
+            donacion_cbu: true,
             donacion_info: true
           }
         }
