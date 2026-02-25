@@ -13,14 +13,83 @@
 - Prisma ORM + PostgreSQL (Supabase)
 - JWT para autenticación
 - Cloudinary para imágenes
-- Nodemailer para emails
+- Resend para emails (antes Nodemailer, pero Render bloquea SMTP)
 - Hosting en Render
 
 **Repositorio:** Este directorio (`B:\TFI\adopcion-api`)
 
 ---
 
-## Lo que hicimos en la última sesión (25 Feb 2026 - Tarde)
+## Lo que hicimos en la última sesión (25 Feb 2026 - Noche)
+
+### 1. Migración del Sistema de Emails: Nodemailer → Resend
+
+**Problema reportado:** El compañero usó el endpoint `POST /api/auth/forgot-password` y recibió 200 OK, pero el email nunca llegó.
+
+**Investigación:**
+1. Revisamos los logs de Render → Error: `Connection timeout` (ETIMEDOUT)
+2. Probamos con Gmail (SMTP) → Mismo error de timeout
+3. Probamos con puerto 465 (SSL) → Mismo error
+
+**Causa raíz:** Render en el **free tier bloquea conexiones SMTP salientes** en todos los puertos (25, 465, 587) para prevenir spam. Es una restricción a nivel de infraestructura.
+
+**Solución implementada:** Migrar de Nodemailer (SMTP) a **Resend** (API HTTP).
+
+Resend es un servicio de email transaccional que usa API HTTP en lugar de SMTP, por lo que no está bloqueado.
+
+**Cambios realizados:**
+
+1. **Instalamos Resend:**
+   ```bash
+   npm install resend
+   ```
+
+2. **Modificamos `src/services/email.service.js`:**
+   - Eliminamos dependencia de `nodemailer` y `transporter`
+   - Importamos SDK de Resend
+   - Cambiamos las funciones para usar `resend.emails.send()`
+   - El remitente es `onboarding@resend.dev` (dominio gratuito de Resend)
+
+3. **Modificamos `src/config/email.js`:**
+   - Agregamos soporte para puerto 465 con SSL (aunque finalmente no se usa)
+   - Agregamos timeouts de conexión
+
+**Variables de entorno en Render:**
+
+| Variable | Valor | Nota |
+|----------|-------|------|
+| `RESEND_API_KEY` | `re_caGqhE4H_...` | API key de Resend |
+| `ADMIN_EMAIL` | `animalitosproyecto@gmail.com` | Donde llegan las notificaciones |
+
+**Variables eliminadas** (ya no se usan):
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+
+**Cuenta de Resend:**
+- Email: `animalitosproyecto@gmail.com`
+- Free tier: 3000 emails/mes
+
+**Cuenta de Gmail creada** (no se usa para SMTP pero quedó):
+- Email: `animalitosproyecto@gmail.com`
+- Password: `Facuyguille`
+- App Password: `mkbyxdfkgtanfxxq` (no se usa)
+
+**Commits:**
+- `df47d60` - fix: Usar puerto 465 SSL y agregar timeouts para SMTP
+- `772bf91` - feat: Migrar de nodemailer SMTP a Resend API para envío de emails
+
+**Archivos modificados:**
+- `src/services/email.service.js` - Reescrito para usar Resend
+- `src/config/email.js` - Actualizado (aunque ya no se importa)
+- `package.json` - Nueva dependencia `resend`
+
+**Resultado:** Los emails ahora se envían correctamente desde Render.
+
+---
+
+## Lo que hicimos en sesión anterior (25 Feb 2026 - Tarde)
 
 ### 1. Nuevo Endpoint: Actualizar Organización
 
@@ -304,4 +373,4 @@ reset('EMAIL_AQUI', 'NUEVA_PASSWORD');
 
 ---
 
-*Última actualización: 25 Feb 2026 - Tarde*
+*Última actualización: 25 Feb 2026 - Noche*
