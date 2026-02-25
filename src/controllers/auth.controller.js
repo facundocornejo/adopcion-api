@@ -203,8 +203,10 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    // Enviar notificación a los super admins
-    await notificarSolicitudRecuperacion(admin);
+    // Enviar notificación a los super admins (en background, sin bloquear respuesta)
+    notificarSolicitudRecuperacion(admin).catch(err => {
+      console.error('Error enviando email de recuperación (background):', err);
+    });
 
     res.json({
       success: true,
