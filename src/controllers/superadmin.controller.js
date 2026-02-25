@@ -203,6 +203,161 @@ const createOrganization = async (req, res) => {
 };
 
 /**
+ * Actualizar organización
+ * PUT /api/super-admin/organizations/:id
+ */
+const updateOrganization = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      nombre,
+      email,
+      telefono,
+      whatsapp,
+      direccion,
+      descripcion,
+      instagram,
+      facebook,
+      donacion_alias,
+      donacion_cbu,
+      donacion_info,
+      admin_username,
+      admin_email
+    } = req.body;
+
+    const orgId = parseInt(id);
+
+    // Verificar que la organización existe
+    const organizacion = await prisma.organizacion.findUnique({
+      where: { id: orgId },
+      include: {
+        administradores: {
+          select: { id: true, username: true, email: true }
+        }
+      }
+    });
+
+    if (!organizacion) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Organización no encontrada'
+        }
+      });
+    }
+
+    // Si se cambia nombre, actualizar slug
+    let newSlug = organizacion.slug;
+    if (nombre && nombre !== organizacion.nombre) {
+      newSlug = nombre
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 45);
+
+      // Verificar si el nuevo slug ya existe (excluyendo la org actual)
+      const existingSlug = await prisma.organizacion.findFirst({
+        where: {
+          slug: newSlug,
+          id: { not: orgId }
+        }
+      });
+      if (existingSlug) {
+        newSlug = `${newSlug}-${Date.now().toString().slice(-4)}`;
+      }
+    }
+
+    // Actualizar organización y admin en transacción
+    const result = await prisma.$transaction(async (tx) => {
+      const updatedOrg = await tx.organizacion.update({
+        where: { id: orgId },
+        data: {
+          nombre: nombre || undefined,
+          slug: nombre ? newSlug : undefined,
+          email: email !== undefined ? (email || null) : undefined,
+          telefono: telefono !== undefined ? (telefono || null) : undefined,
+          whatsapp: whatsapp !== undefined ? (whatsapp || null) : undefined,
+          direccion: direccion !== undefined ? (direccion || null) : undefined,
+          descripcion: descripcion !== undefined ? (descripcion || null) : undefined,
+          instagram: instagram !== undefined ? (instagram || null) : undefined,
+          facebook: facebook !== undefined ? (facebook || null) : undefined,
+          donacion_alias: donacion_alias !== undefined ? (donacion_alias || null) : undefined,
+          donacion_cbu: donacion_cbu !== undefined ? (donacion_cbu || null) : undefined,
+          donacion_info: donacion_info !== undefined ? (donacion_info || null) : undefined
+        },
+        include: {
+          administradores: {
+            select: { id: true, username: true, email: true }
+          }
+        }
+      });
+
+      // Actualizar admin principal si se envían datos
+      if ((admin_username || admin_email) && organizacion.administradores.length > 0) {
+        const adminId = organizacion.administradores[0].id;
+
+        // Verificar duplicados si se cambia username o email
+        if (admin_username || admin_email) {
+          const existingAdmin = await tx.administrador.findFirst({
+            where: {
+              OR: [
+                admin_username ? { username: admin_username } : {},
+                admin_email ? { email: admin_email } : {}
+              ].filter(obj => Object.keys(obj).length > 0),
+              id: { not: adminId }
+            }
+          });
+
+          if (existingAdmin) {
+            throw new Error('DUPLICATE_ADMIN');
+          }
+        }
+
+        await tx.administrador.update({
+          where: { id: adminId },
+          data: {
+            username: admin_username || undefined,
+            email: admin_email || undefined
+          }
+        });
+      }
+
+      return updatedOrg;
+    });
+
+    res.json({
+      success: true,
+      data: {
+        organizacion: result,
+        message: 'Organización actualizada correctamente'
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en updateOrganization:', error);
+
+    if (error.message === 'DUPLICATE_ADMIN') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'DUPLICATE_ERROR',
+          message: 'El username o email del admin ya está en uso'
+        }
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Error al actualizar la organización'
+      }
+    });
+  }
+};
+
+/**
  * Activar/Desactivar organización
  * PUT /api/super-admin/organizations/:id/toggle
  */
@@ -592,6 +747,7 @@ module.exports = {
   verificarSuperAdmin,
   getOrganizations,
   createOrganization,
+  updateOrganization,
   toggleOrganization,
   deleteOrganization,
   getContactRequests,

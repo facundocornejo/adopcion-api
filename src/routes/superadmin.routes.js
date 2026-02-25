@@ -5,6 +5,7 @@ const {
   verificarSuperAdmin,
   getOrganizations,
   createOrganization,
+  updateOrganization,
   toggleOrganization,
   deleteOrganization,
   getContactRequests,
@@ -243,6 +244,91 @@ router.get('/super-admin/organizations', verificarToken, verificarSuperAdmin, ge
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/super-admin/organizations', verificarToken, verificarSuperAdmin, createOrganization);
+
+/**
+ * @swagger
+ * /api/super-admin/organizations/{id}:
+ *   put:
+ *     summary: Actualizar organización
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la organización
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: "Refugio Actualizado"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               telefono:
+ *                 type: string
+ *               whatsapp:
+ *                 type: string
+ *               direccion:
+ *                 type: string
+ *               descripcion:
+ *                 type: string
+ *               instagram:
+ *                 type: string
+ *               facebook:
+ *                 type: string
+ *               donacion_alias:
+ *                 type: string
+ *               donacion_cbu:
+ *                 type: string
+ *               donacion_info:
+ *                 type: string
+ *               admin_username:
+ *                 type: string
+ *                 description: "Actualiza username del admin principal"
+ *               admin_email:
+ *                 type: string
+ *                 format: email
+ *                 description: "Actualiza email del admin principal"
+ *     responses:
+ *       200:
+ *         description: Organización actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     organizacion:
+ *                       type: object
+ *                     message:
+ *                       type: string
+ *                       example: Organización actualizada correctamente
+ *       400:
+ *         description: Datos inválidos o email/username duplicado
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Acceso denegado - Solo super admin
+ *       404:
+ *         description: Organización no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/super-admin/organizations/:id', verificarToken, verificarSuperAdmin, updateOrganization);
 
 /**
  * @swagger
