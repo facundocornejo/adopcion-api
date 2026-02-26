@@ -1,0 +1,27 @@
+el fb: https://www.facebook.com/salvando.patitas.281803
+instagram: https://www.instagram.com/salvandopatitas.pna/?hl=es-la 
+
+email: nosomosinvisibles@hotmail.com 	
+
+contraseña: Noinvisibles(sin espacio)
+username: salvando patitas
+
+nombre: "no somos invisibles" 
+
+slug:  salvando-patitas
+
+telefono: 3434710123
+
+whatsap: 3434710123
+
+direccion: avenida ejercito 1243
+
+descripcion: Grupo de voluntarias y activistas  que trabajan para salvar vidas.
+
+donacion_alias: salvandopatitas26
+
+donacion_cbu: 0000003134126774512
+
+donacion_info: a nombre de Vanina martinez -- mercado pago
+
+logo_url: es la imagen que esta en la carpeta suelta, el ico, se peude subir desde aca? 

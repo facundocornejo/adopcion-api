@@ -44,6 +44,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://adopcion-responsable.vercel.app',
+  'https://tfi-pet-adoption-front.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 

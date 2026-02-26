@@ -1,7 +1,12 @@
 const { Resend } = require('resend');
 
-// Inicializar Resend con la API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicializar Resend solo si hay API key (permite desarrollo sin credenciales)
+let resend = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+  console.warn('⚠️  RESEND_API_KEY no configurada - Emails deshabilitados');
+}
 
 // Email remitente (usar onboarding@resend.dev hasta verificar dominio propio)
 const FROM_EMAIL = 'Adopción Responsable <onboarding@resend.dev>';
@@ -32,6 +37,12 @@ const escapeHtml = (text) => {
  */
 const notificarNuevaSolicitud = async (solicitud, animal, organizacion = null) => {
   try {
+    // Verificar que Resend esté configurado
+    if (!resend) {
+      console.warn('Resend no configurado - Email no enviado');
+      return { success: false, reason: 'Resend not configured' };
+    }
+
     // Usar email de la organización si existe, sino el ADMIN_EMAIL global
     const destinatario = organizacion?.email || process.env.ADMIN_EMAIL;
 
@@ -143,6 +154,12 @@ const verificarConfiguracionEmail = async () => {
  */
 const notificarSolicitudRecuperacion = async (admin) => {
   try {
+    // Verificar que Resend esté configurado
+    if (!resend) {
+      console.warn('Resend no configurado - Email no enviado');
+      return { success: false, reason: 'Resend not configured' };
+    }
+
     const destinatario = process.env.ADMIN_EMAIL;
 
     if (!destinatario) {

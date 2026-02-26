@@ -20,7 +20,52 @@
 
 ---
 
-## Lo que hicimos en la última sesión (25 Feb 2026 - Noche continuación)
+## Lo que hicimos en la última sesión (26 Feb 2026 - Madrugada)
+
+### 1. Reactivar Organizaciones de Super Admins
+
+**Problema:** No se podía loguear, el sistema decía "La organización está desactivada".
+
+**Causa:** En la limpieza de BD anterior, marcamos las organizaciones de los super admins como `activa: false` para ocultarlas de listados públicos, pero eso también bloqueaba el login.
+
+**Solución:** Reactivamos las organizaciones con IDs 1 y 4:
+```javascript
+prisma.organizacion.updateMany({
+  where: { id: { in: [1, 4] } },
+  data: { activa: true }
+});
+```
+
+**Estado actual:**
+| ID | Organización | Usuario | Estado |
+|----|--------------|---------|--------|
+| 1 | Organización Huellas de Amore | guille | ✅ activa |
+| 4 | refugio india | facu | ✅ activa |
+
+---
+
+### 2. Fix Error 500 en POST /api/contact-requests
+
+**Problema reportado por Guille:** Error 500 Internal Server Error al enviar solicitud de contacto.
+
+**Causa:** El frontend enviaba `cantidad_animales: 9` (número) pero Prisma esperaba un String (`@db.VarChar(50)`).
+
+**Solución:** Convertir automáticamente a string en el backend:
+```javascript
+// Antes
+cantidad_animales: cantidad_animales || null
+
+// Después
+cantidad_animales: cantidad_animales ? String(cantidad_animales) : null
+```
+
+**Archivo modificado:** `src/controllers/superadmin.controller.js`
+
+**Commit:** `3059582` - fix: Aceptar número o string en cantidad_animales de contact-requests
+
+---
+
+## Lo que hicimos antes (25 Feb 2026 - Noche continuación)
 
 ### 1. Endpoint Animal con Datos de Donación y Redes Sociales
 
@@ -425,4 +470,4 @@ reset('EMAIL_AQUI', 'NUEVA_PASSWORD');
 
 ---
 
-*Última actualización: 25 Feb 2026 - Noche (continuación)*
+*Última actualización: 26 Feb 2026 - Madrugada*
