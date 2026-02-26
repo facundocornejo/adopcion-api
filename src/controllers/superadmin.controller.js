@@ -619,7 +619,7 @@ const createContactRequest = async (req, res) => {
         descripcion,
         instagram: instagram || null,
         facebook: facebook || null,
-        cantidad_animales: cantidad_animales || null
+        cantidad_animales: cantidad_animales ? String(cantidad_animales) : null
       }
     });
 
