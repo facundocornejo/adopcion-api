@@ -20,7 +20,136 @@
 
 ---
 
-## Lo que hicimos en la última sesión (26 Feb 2026 - Madrugada)
+## Lo que hicimos en la última sesión (26 Feb 2026 - Noche)
+
+### 1. Nueva Organización: Salvando Patitas
+
+**Datos creados:**
+| Campo | Valor |
+|-------|-------|
+| ID | 9 |
+| Nombre | Salvando Patitas |
+| Slug | salvando-patitas |
+| Email | salvandopatitas@hotmail.com |
+| Teléfono/WhatsApp | 3434710123 |
+| Dirección | avenida ejercito 1243 |
+| Instagram | salvandopatitas.pna |
+| Facebook | https://www.facebook.com/salvando.patitas.281803 |
+| Donación Alias | salvandopatitas26 |
+| Donación CBU | 0000003134126774512 |
+| Logo | https://res.cloudinary.com/dcwrrdwc1/image/upload/v1772128793/organizaciones/salvando-patitas-logo.png |
+
+**Admin creado:**
+| Campo | Valor |
+|-------|-------|
+| ID | 9 |
+| Username | salvando patitas |
+| Email | salvandopatitas@hotmail.com |
+| Password | resilencia |
+| Super Admin | No |
+
+### 2. Animales Cargados para Salvando Patitas
+
+| ID | Nombre | Especie | Raza | Sexo | Edad | Tamaño | Fotos |
+|----|--------|---------|------|------|------|--------|-------|
+| 26 | Aton | Perro | Dóberman | Macho | 1 año y medio | Grande | 1 |
+| 27 | Calita | Perro | Mestiza/Galgo | Hembra | 2 meses y medio | Mediano | 5 |
+| 28 | Kenia | Perro | Mestiza | Hembra | 9 meses | Pequeño | 3 |
+| 29 | Mili | Gato | Mestiza | Hembra | 3-4 meses | Pequeño | 3 |
+
+**Nota sobre tamaños válidos:** `Pequeño`, `Mediano`, `Grande` (no usar "Chico")
+
+### 3. Fix: Servicio de Email no crashea sin API Key
+
+**Problema:** La app crasheaba al iniciar si no existía `RESEND_API_KEY` en el .env local.
+
+**Solución:** Modificar `src/services/email.service.js` para inicializar Resend solo si existe la key:
+```javascript
+let resend = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+  console.warn('⚠️  RESEND_API_KEY no configurada - Emails deshabilitados');
+}
+```
+
+Las funciones de email ahora verifican si `resend` existe antes de intentar enviar.
+
+### 4. Fix: CORS para nuevo dominio de Vercel
+
+**Problema:** El frontend desplegado en `tfi-pet-adoption-front.vercel.app` daba error 500 en preflight OPTIONS.
+
+**Causa:** El dominio no estaba en la lista de orígenes permitidos.
+
+**Solución:** Agregar dominio en `src/app.js`:
+```javascript
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://adopcion-responsable.vercel.app',
+  'https://tfi-pet-adoption-front.vercel.app',  // ← NUEVO
+  process.env.FRONTEND_URL
+].filter(Boolean);
+```
+
+### 5. Configuración de Repositorio UTN
+
+**Objetivo:** Tener el código en el repo de la UTN para la entrega del TFI.
+
+**Remotes configurados:**
+| Remote | URL | Uso |
+|--------|-----|-----|
+| `origin` | github.com/facundocornejo/adopcion-api | Repo personal (trabajo diario) |
+| `utn` | github.com/TFI-UTN-Programacion-2026-adopcion/tfi-pet-adoption-api | Repo UTN (entrega) |
+
+**Comandos útiles:**
+```bash
+git push              # Push a tu repo personal (origin)
+git push utn main     # Push al repo de la UTN
+```
+
+**Limpieza realizada en repo UTN:** Se eliminaron archivos `CLAUDE.md` y `.claude/` del repo de la UTN sin afectar el local ni el repo personal.
+
+### 6. Diagnóstico: Frontend no filtra por organización
+
+**Problema reportado:** Admin logueado veía animales de TODAS las organizaciones.
+
+**Causa:** El frontend no enviaba el header `Authorization` en la request a `/api/animals`.
+
+**Solución (para frontend):** Incluir el token en todas las requests autenticadas:
+```javascript
+headers: {
+  'Authorization': `Bearer ${token}`
+}
+```
+
+El backend ya filtra automáticamente por `organizacion_id` del admin cuando recibe un token válido.
+
+### 7. Limpieza de Base de Datos
+
+**Eliminados:**
+- Admins: elfacuguille (ID 7), facuyguille@ejemplo.com (ID 8), ABorrar (ID 11)
+- Animal: Bet (ID 25)
+- Organizaciones vacías: 7, 8, 11
+- Solicitudes de contacto: IDs 2 y 3 (quedó solo "Organizacion BC")
+
+### 8. Credenciales Actualizadas
+
+**Super Admins:**
+| Usuario | Email | Password |
+|---------|-------|----------|
+| facu | facundocornejodediego@hotmail.com | Facu2026! |
+| Guille | guillelondero@gmail.com | betycapa2 |
+
+**Admins de Organizaciones:**
+| Organización | Email | Password |
+|--------------|-------|----------|
+| Salvando Patitas | salvandopatitas@hotmail.com | resilencia |
+| silvi | silvi@gmail.com | (no reseteada) |
+
+---
+
+## Lo que hicimos antes (26 Feb 2026 - Madrugada)
 
 ### 1. Reactivar Organizaciones de Super Admins
 
@@ -470,4 +599,4 @@ reset('EMAIL_AQUI', 'NUEVA_PASSWORD');
 
 ---
 
-*Última actualización: 26 Feb 2026 - Madrugada*
+*Última actualización: 26 Feb 2026 - Noche*

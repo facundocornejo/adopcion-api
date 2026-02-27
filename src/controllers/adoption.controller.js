@@ -388,14 +388,24 @@ const updateAdoptionRequestStatus = async (req, res) => {
       }
     });
 
-    // Si la solicitud fue aprobada, opcionalmente cambiar estado del animal
-    // Esto se puede hacer manualmente o agregar lógica aquí
+    // Si la solicitud fue APROBADA, cambiar el animal a "Adoptado" automáticamente
+    let animalActualizado = false;
+    if (estado_solicitud === 'Aprobada') {
+      await prisma.animal.update({
+        where: { id: existingSolicitud.animal.id },
+        data: { estado: 'Adoptado' }
+      });
+      animalActualizado = true;
+    }
 
     res.json({
       success: true,
       data: {
         solicitud,
-        message: `Estado actualizado a "${estado_solicitud}"`
+        animal_actualizado: animalActualizado,
+        message: animalActualizado
+          ? `Estado actualizado a "${estado_solicitud}" y el animal "${existingSolicitud.animal.nombre}" fue marcado como Adoptado`
+          : `Estado actualizado a "${estado_solicitud}"`
       }
     });
 

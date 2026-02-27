@@ -38,3 +38,7 @@ docs/
 
 # Test coverage
 coverage/
+
+# Archivos personales (no subir)
+PRESENTACION_GUION.md
+guion.txt
