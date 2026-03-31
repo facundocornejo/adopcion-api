@@ -227,4 +227,71 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-module.exports = { login, logout, me, forgotPassword };
+// PUT /api/auth/change-password - Cambiar contraseña del admin autenticado
+const changePassword = async (req, res) => {
+  try {
+    const { password_actual, password_nueva } = req.body;
+
+    if (!password_actual || !password_nueva) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'La contraseña actual y la nueva son requeridas'
+        }
+      });
+    }
+
+    if (password_nueva.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'La nueva contraseña debe tener al menos 6 caracteres'
+        }
+      });
+    }
+
+    // Buscar admin
+    const admin = await prisma.administrador.findUnique({
+      where: { id: req.admin.id }
+    });
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Administrador no encontrado' }
+      });
+    }
+
+    // Verificar contraseña actual
+    const passwordValido = await bcrypt.compare(password_actual, admin.password_hash);
+    if (!passwordValido) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'INVALID_PASSWORD', message: 'La contraseña actual es incorrecta' }
+      });
+    }
+
+    // Hashear y actualizar
+    const newHash = await bcrypt.hash(password_nueva, 10);
+    await prisma.administrador.update({
+      where: { id: req.admin.id },
+      data: { password_hash: newHash }
+    });
+
+    res.json({
+      success: true,
+      data: { message: 'Contraseña actualizada correctamente' }
+    });
+
+  } catch (error) {
+    console.error('Error en changePassword:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Error interno del servidor' }
+    });
+  }
+};
+
+module.exports = { login, logout, me, forgotPassword, changePassword };

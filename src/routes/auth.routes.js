@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login, logout, me, forgotPassword } = require('../controllers/auth.controller');
+const { login, logout, me, forgotPassword, changePassword } = require('../controllers/auth.controller');
 const { verificarToken } = require('../middlewares/auth.middleware');
 
 /**
@@ -216,5 +216,38 @@ router.get('/me', verificarToken, me);
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/forgot-password', forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/change-password:
+ *   put:
+ *     summary: Cambiar contraseña del admin autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password_actual
+ *               - password_nueva
+ *             properties:
+ *               password_actual:
+ *                 type: string
+ *               password_nueva:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada
+ *       400:
+ *         description: Validación fallida
+ *       401:
+ *         description: Contraseña actual incorrecta
+ */
+router.put('/change-password', verificarToken, changePassword);
 
 module.exports = router;

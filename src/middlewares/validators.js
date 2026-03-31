@@ -63,14 +63,14 @@ const animalValidation = [
     .escape(), // Sanitizar XSS
 
   body('contacto_rescatista')
+    .optional({ nullable: true })
     .trim()
-    .notEmpty().withMessage('El contacto del rescatista es obligatorio')
     .isLength({ max: 200 }).withMessage('No puede superar 200 caracteres')
     .escape(), // Sanitizar XSS
 
   body('foto_principal')
+    .optional({ nullable: true })
     .trim()
-    .notEmpty().withMessage('La foto principal es obligatoria')
     .isURL().withMessage('La foto principal debe ser una URL válida'),
 
   // Campos opcionales con validación
